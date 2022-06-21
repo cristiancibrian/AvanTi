@@ -1,0 +1,8 @@
+mx\avanti\CorreosSiract\clases\EnvioAlertas.class
+mx\avanti\CorreosSiract\clases\EnvioAlertaThread.class
+mx\avanti\CorreosSiract\persistencia\HibernateUtil.class
+mx\avanti\CorreosSiract\clases\EnvioAlertaThread$Envio.class
+mx\avanti\CorreosSiract\persistencia\BaseDAO.class
+mx\avanti\CorreosSiract\persistencia\Criterios.class
+mx\avanti\CorreosSiract\clases\QuartzListener.class
+ServletInsercion.class

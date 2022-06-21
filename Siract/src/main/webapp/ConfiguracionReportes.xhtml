@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html">
+            <h:head>
+
+                <h:outputStylesheet name="Style_botones.css" library="css"/>
+                <script type="text/javascript" src="resources/LocalES.js"></script>
+                <f:facet name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Configuración del Sistema</title>
+                    <link rel="stylesheet" href="resources/estilo.css"></link>
+                </f:facet>
+            </h:head>
+
+            <h:body>
+                <!-- Script para cuando se abra una ventana o dialogo se mantenga en una
+                sola posicion y bloquee el que se pueda hacer scroll -->
+                <script>
+                    function ovBodyAuto() {
+                        $('html, body').css('overflow', 'auto');
+                    }
+
+                    function ovBodyHidden() {
+                        $('html, body').css('overflow', 'hidden');
+                    }
+                </script>
+
+                <br/>
+                <h:form id="frmCalendario" rendered="#{loginBean.permisoGeneral(configuracionBeanUI.ID_CATALOGO_CONFIGURACION)}">
+
+
+                    <!-- Inicio configuración -->
+
+                    <div id="div">
+                        <!-- -->           <!--Inicio de configuración -->
+                        <p:fieldset legend="Configuración"
+                                    style="width: 70%; margin: 0 auto; border: 1px black solid; border-radius: 5px;">
+
+                            <!-- Botones para agregar un ciclo escolar -->
+
+                            <p:commandButton title="Agregar"
+                                             style="margin-left: 13%;"
+                                             id="showAltaButtonCE"
+                                             icon="fa fa-fw fa-plus"
+                                             oncomplete="PF('dlg').show();"
+                                             iconPos="center"
+                                             actionListener="#{configuracionBeanUI.nuevo}"
+                                             update="frmCicloEscolar:capdlg"/>
+
+
+                            <p:commandButton style="margin-left: -4px;"
+                                             disabled="#{configuracionBeanUI.ns}"
+                                             title="#{configuracionBeanUI.toolTip(1)}"
+                                             id="showEliminarButtonCE" icon="fa fa-fw fa-minus-circle"   
+                                             oncomplete="PF('dlg').show();"
+                                             iconPos="center"
+                                             actionListener="#{configuracionBeanUI.eliminar()}"
+                                             update="frmCicloEscolar:capdlg"/>
+
+                            <p:commandButton style="margin-left: 1px;"
+                                             disabled="#{configuracionBeanUI.ns}"
+                                             title="#{configuracionBeanUI.toolTip(2)}"
+                                             id="showMostrarButtonCE"
+                                             icon="fa fa-fw fa-pencil-square-o"
+                                             oncomplete="PF('dlg').show();"
+                                             iconPos="center"
+                                             actionListener="#{configuracionBeanUI.modificar}"
+                                             update="frmCicloEscolar:capdlg"/>
+                            <!-- Fin de botones -->
+
+                            <center>
+
+                                <p:outputPanel id="panel">
+
+                                    <h:panelGrid id="grid" cellpadding="10" columns="3">
+                                        <h:column>
+                                            <div style="margin-top:-2%; margin-left: 109px;">
+                                                <center><h:outputLabel id="c" for="selCicloEscolar"
+                                                                       value="Ciclo escolar: "/></center>
+                                                <p:selectOneMenu id="selCicloEscolar" editable="false"
+                                                                 value="#{configuracionBeanUI.configuracionBeanHelper.cicloescolar.CESid}"
+                                                                 onchange="if (!this.selectedIndex) location.reload()"
+                                                >
+                                                    <!-- SBP Aqui nos quedamos :D -->
+                                                    <f:selectItem itemLabel="Seleccione" itemValue="00"/>
+                                                    <f:selectItems
+                                                            value="#{configuracionBeanUI.configuracionBeanHelper.ciclosEscolares}"
+                                                            var="ciclo" itemLabel="#{ciclo.CEScicloEscolar}"
+                                                            itemValue="#{ciclo.CESid}"/>
+                                                    <p:ajax event="valueChange"
+                                                            update=":frmCalendario:calendario, :frmCalendario:showAltaButton, :frmCalendario:spiNumSemanas, :frmCalendario:calFechaInicio, :frmCalendario:showEliminarButton, :frmCalendario:showModificarButton, frmCalendario:showEliminarButtonCE, :frmCalendario:showMostrarButtonCE"
+                                                            listener="#{configuracionBeanUI.changeCicloEscolarListener(configuracionBeanUI.configuracionBeanHelper.cicloescolar.CESid)}"
+
+                                                    />
+
+                                                    <script>
+                                                        function hola() {
+                                                            location.reload();
+                                                        }
+                                                    </script>
+
+                                                </p:selectOneMenu>
+                                            </div>
+                                        </h:column>
+
+                                        <h:column>
+                                            <div style="margin-left: 30px;">
+                                                <h:outputLabel style="margin-left: 7.5%;" value="Número de semanas: "
+                                                               for="spiNumSemanas"/>
+
+                                                <p:spinner style="margin-left: 7%;" size="13" id="spiNumSemanas" min="3"
+                                                           max="20" maxlength="2" disabled="#{configuracionBeanUI.ns}"
+                                                           value="#{configuracionBeanUI.configuracionBeanHelper.configuracion.CONnumeroSemanas}"
+                                                           onkeypress="return false">
+                                                    <p:ajax event="change"
+                                                            listener="#{configuracionBeanUI.habilitarAceptar(false)}"
+                                                            update=":frmCalendario:aceptarConfig"/>
+                                                </p:spinner>
+                                            </div>
+                                        </h:column>
+
+                                        <h:column>
+                                            <h:outputText style="margin-left: -1%"
+                                                          value="Fecha de envío alerta general:"/>
+
+                                            <p:calendar style="margin-left: -2%" size="15" id="calFechaInicio"
+                                                        showOn="button" locale="es" readonlyInput="true"
+                                                        disabled="#{configuracionBeanUI.envio}" pattern="dd/MMMM/yyyy"
+                                                        value="#{configuracionBeanUI.configuracionBeanHelper.configuracion.CONfechaInicioSemestre}"
+                                                        mindate="#{configuracionBeanUI.fechaMinSemestre1}"
+                                                        maxdate="#{configuracionBeanUI.fechaMaxSemestre1}">
+                                                <p:ajax event="dateSelect"
+                                                        listener="#{configuracionBeanUI.habilitarAceptar(false)}"
+                                                        update=":frmCalendario:aceptarConfig, :frmCalendario:fechacorte"/>
+                                            </p:calendar>
+                                            <!--Basta de control z-->
+                                        </h:column>
+                                    </h:panelGrid>
+                                </p:outputPanel>
+                            </center>
+                            <center>
+
+                                <p:commandButton style="margin-top:2%;" id="aceptarConfig" value="Aceptar"
+                                                 actionListener="#{configuracionBeanUI.guardarConfiguracion()}"
+                                                 disabled="#{configuracionBeanUI.botonAceptar}"
+                                                 update="growl, :frmCalendario:panel"
+                                                 immediate="true"/>
+                                <p:commandButton value="Cancelar" onclick="location.reload()"/>
+                            </center>
+                        </p:fieldset>
+                        <!-- Aqui estaba el botón aceptar configuración-->
+                    </div>
+                    <!-- Fin configuración -->
+                    <br/>
+                    <p:fieldset legend="Calendarios"
+                                style="width: 70%; margin: 0 auto; border: 1px black solid; border-radius: 5px;">
+                        <h:panelGrid columns="1" style="width:845px; margin: 0 auto; text-align:center;">
+                            <h:column>
+                                <p:commandButton id="showAltaButton" icon="fa fa-fw fa-plus" 
+                                                 disabled="#{configuracionBeanUI.botonAdd}"
+                                                 title="Captura de limite y corte"
+                                                 iconPos="center"
+                                                 update=":frmCalendario:cap, :frmCalendario:tablaDias, growl"
+                                                 action="#{configuracionBeanUI.agregarNuevoCR()}"/>
+                                <p:commandButton id="showEliminarButton" icon="fa fa-fw fa-minus-circle" 
+                                                 disabled="#{configuracionBeanUI.botonDel}"
+                                                 oncomplete="PF('dlgeliminar').show()" iconPos="center"
+                                                 update="display"/>
+                                <p:commandButton id="showModificarButton" icon="fa fa-fw fa-pencil-square-o" oncomplete="PF('dlgmod').show()"
+                                                 disabled="#{configuracionBeanUI.botonMod}"
+                                                 iconPos="center"
+                                                 action="#{configuracionBeanUI.modificarCalendarioReporteListener()}"
+                                                 update=":frmCalendario:mod, :frmCalendario:diasCorteM, :frmCalendario:diasLimiteM, :frmCalendario:diasAtrasoM"/>
+                                <p:commandButton id="showBtnMensaje" value="Configuración de mensajes"
+                                                 oncomplete="PF('dlgmensaje').show()" iconPos="center"/>
+                                <p:commandButton id="showBtnAlerta" value="Configuración de alertas"
+                                                 oncomplete="PF('dlgalerta').show()" iconPos="center"
+                                                 action="#{configuracionBeanUI.modificarAlertas()}"
+                                />
+                            </h:column>
+                        </h:panelGrid>
+                        <!--Calendario de reportes-->
+
+                        <h:panelGrid columns="1" border="0" style="width:845px; margin: 0 auto; text-align:center; ">
+                            <p:dataTable id="calendario" var="config" emptyMessage="No se encontraron registros."
+                                         value="#{configuracionBeanUI.configuracionBeanHelper.calendarioreportes}"
+                                         rowKey="#{config.CREid}"
+                                         selection="#{configuracionBeanUI.configuracionBeanHelper.seleccionCalendario}"
+                                         selectionMode="single">
+                                <p:column headerText="Fecha corte" style="width:24%">
+                                    <h:outputText value="#{config.CREfechaCorte}">
+                                        <f:convertDateTime dateStyle="long" locale="es_MX"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Fecha límite" style="width:24%">
+                                    <h:outputText value="#{config.CREfechaLimite}">
+                                        <f:convertDateTime dateStyle="long" locale="es_MX"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:ajax event="rowSelect" listener="#{configuracionBeanUI.onRowSelect}"
+                                        update=":frmCalendario:showEliminarButton, :frmCalendario:showModificarButton"/>
+                            </p:dataTable>
+                        </h:panelGrid>
+                    </p:fieldset>
+
+                    <!--Termina Calendario de reportes-->
+
+                    <!-- DIALOGO PARA CAPTURAR PERIODOS -->
+                    <p:dialog header="Agregar calendario reporte" resizable="false"
+                              widgetVar="dlgcaptura" onHide="ovBodyAuto();" onShow="ovBodyHidden();">
+
+                        <h:panelGrid id="cap" border="0" columns="4" style="margin-top:20px; margin-bottom: 35px;">
+
+                            <f:facet name="header">
+                                <p:column>Período hábil para reportar avance</p:column>
+                            </f:facet>
+                            <p:column>
+                                <p:outputLabel value="Fecha corte"/>
+                                <p:calendar id="fechacorte" locale="es" showOn="button" readonlyInput="true"
+                                            mindate="#{configuracionBeanUI.ultimoRACT1}"
+                                            maxdate="#{configuracionBeanUI.fechaMaxSemestre1}"
+                                            value="#{configuracionBeanUI.fechaCorte1}">
+                                    <p:ajax update=":frmCalendario:fechalimite, :frmCalendario:calFechaInicio"
+                                            event="dateSelect"
+                                            listener="#{configuracionBeanUI.setHabilitarFechaLimite(false)}"/>
+                                </p:calendar>
+                            </p:column>
+                            <p:column>
+                                <p:outputLabel value="Fecha límite"/>
+                                <p:calendar id="fechalimite" locale="es" showOn="button" readonlyInput="true"
+                                            disabled="#{configuracionBeanUI.habilitarFechaLimite}"
+                                            mindate="#{configuracionBeanUI.fechaCorte1}"
+                                            maxdate="#{configuracionBeanUI.fechaMaxSemestre1}"
+                                            value="#{configuracionBeanUI.fechaLimite1}"/>
+                            </p:column>
+                        </h:panelGrid>
+
+                        <p:separator/>
+                        <center>
+                            <br/>
+                            <p:outputLabel value="¿Cuándo deben enviarse los mensajes de alerta?"
+                                           style="font-style: italic;"/>
+                            <p:panelGrid id="tablaDias" style="margin-top: 10px; margin-bottom: 20px">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column colspan="1">Alerta pre-corte</p:column>
+                                        <p:column colspan="1">Alerta pre-límite</p:column>
+                                        <p:column colspan="1">Alerta de atraso</p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column headerText="Días antes del corte">
+                                        <p:outputLabel value="Días antes del corte "/>
+                                        <p:spinner id="diasCorte" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasCorte}"/>
+                                    </p:column>
+                                    <p:column headerText="Días antes del límite">
+                                        <p:outputLabel value="Días antes del límite "/>
+                                        <p:spinner id="diasLimite" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasLimite}"/>
+                                    </p:column>
+                                    <p:column headerText="Días después del límite">
+                                        <p:outputLabel value="Días después del límite "/>
+                                        <p:spinner id="diasAtraso" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasAtraso}"/>
+
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </center>
+                        <center>
+                            <p:commandButton value="Aceptar" oncomplete="PF('dlgcaptura').hide()" icon="ui-icon-check"
+                                             action="#{configuracionBeanUI.guardarCalendarioReporte()}"
+                                             update=":frmCalendario:calendario, growl"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-cancel" oncomplete="PF('dlgcaptura').hide()"
+                                             action="#{configuracionBeanUI.setHabilitarFechaLimite(true)}"/>
+                        </center>
+                    </p:dialog>
+                    <!--Dialogo para modificar periodos-->
+                    <p:dialog header="Modificar calendario reporte" resizable="false"
+                              widgetVar="dlgmod" onHide="ovBodyAuto();" onShow="ovBodyHidden();">
+                        <h:panelGrid id="mod" border="0" columns="4" style="margin-top:20px; margin-bottom: 35px;">
+                            <f:facet name="header">
+                                <p:column>Período hábil para reportar avance</p:column>
+                            </f:facet>
+                            <p:column>
+                                <p:outputLabel value="Fecha corte"/>
+                                <p:calendar id="fechacorteM" locale="es" showOn="button" readonlyInput="true"
+                                            mindate="#{configuracionBeanUI.CONfechaInicio}"
+                                            maxdate="#{configuracionBeanUI.fechaMaxSemestre1}"
+                                            value="#{configuracionBeanUI.fechaCorteM1}">
+                                    <p:ajax update=":frmCalendario:fechalimiteM, :frmCalendario:calFechaInicio"
+                                            event="dateSelect"
+                                            listener="#{configuracionBeanUI.setHabilitarFechaLimiteM(false)}"/>
+                                </p:calendar>
+                            </p:column>
+                            <p:column>
+                                <p:outputLabel value="Fecha límite"/>
+                                <p:calendar id="fechalimiteM" locale="es" showOn="button" readonlyInput="true"
+                                            disabled="#{configuracionBeanUI.habilitarFechaLimiteM}"
+                                            mindate="#{configuracionBeanUI.fechaCorteM1}"
+                                            maxdate="#{configuracionBeanUI.fechaMaxSemestre1}"
+                                            value="#{configuracionBeanUI.fechaLimiteM1}"/>
+                            </p:column>
+                        </h:panelGrid>
+                        <p:separator/>
+                        <center>
+                            <br/>
+                            <p:outputLabel value="¿Cuándo deben enviarse los mensajes de alerta?"
+                                           style="font-style: italic;"/>
+                            <p:panelGrid id="tablaDiasM" style="margin-top: 10px; margin-bottom: 20px">
+                                <f:facet name="header">
+                                    <p:row>
+                                        <p:column colspan="1">Alerta pre-corte</p:column>
+                                        <p:column colspan="1">Alerta pre-límite</p:column>
+                                        <p:column colspan="1">Alerta de atraso</p:column>
+                                    </p:row>
+                                </f:facet>
+                                <p:row>
+                                    <p:column headerText="Días antes del corte">
+                                        <p:outputLabel value="Días antes del corte "/>
+                                        <p:spinner id="diasCorteM" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasCorteM}"/>
+                                    </p:column>
+                                    <p:column headerText="Días antes del límite">
+                                        <p:outputLabel value="Días antes del límite "/>
+                                        <p:spinner id="diasLimiteM" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasLimiteM}"/>
+                                    </p:column>
+                                    <p:column headerText="Días después del límite">
+                                        <p:outputLabel value="Días después del límite "/>
+                                        <p:spinner id="diasAtrasoM" min="1" max="7" size="1" maxlength="1"
+                                                   onkeydown="return false"
+                                                   value="#{configuracionBeanUI.diasAtrasoM}"/>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        </center>
+                        <center>
+                            <p:outputLabel value="¿Está seguro de guardar los cambios?"/><br/>
+                            <p:commandButton value="Aceptar" oncomplete="PF('dlgmod').hide()" icon="ui-icon-check"
+                                             action="#{configuracionBeanUI.modificarCalendarioReporte()}"
+                                             update=":frmCalendario:calendario, growl"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-cancel" oncomplete="PF('dlgmod').hide()"
+                                             action="#{configuracionBeanUI.setHabilitarFechaLimiteM(true)}"/>
+                        </center>
+                    </p:dialog>
+
+                    <!-- DIALOGO PARA ELIMINAR PERIODO -->
+                    <p:dialog header="Eliminar calendario reporte" widgetVar="dlgeliminar" closable="true"
+                              resizable="false" id="fechaReporteDlg" showEffect="fade" hideEffect="fade"
+                              onHide="ovBodyAuto();" onShow="ovBodyHidden();">
+                        <h:panelGrid id="display" style="margin-top:20px; position: relative">
+                            <p:outputLabel value="¿Está seguro de eliminar el registro?"/><br/>
+                            <p:row>
+                                <p:column><p:outputLabel value="Fecha corte: "/></p:column>
+                                <p:column><p:outputLabel
+                                        value="#{configuracionBeanUI.configuracionBeanHelper.seleccionCalendario.CREfechaCorte}"><f:convertDateTime
+                                        dateStyle="long" locale="es_MX"/></p:outputLabel></p:column>
+                            </p:row><p:row>
+                            <p:column><p:outputLabel value="Fecha límite: "/></p:column>
+                            <p:column><p:outputLabel
+                                    value="#{configuracionBeanUI.configuracionBeanHelper.seleccionCalendario.CREfechaLimite}"><f:convertDateTime
+                                    dateStyle="long" locale="es_MX"/></p:outputLabel></p:column>
+                        </p:row>
+                        </h:panelGrid>
+                        <br/>
+                        <center>
+                            <p:commandButton value="Aceptar" id="eliminar" icon="ui-icon-check"
+                                             actionListener="#{configuracionBeanUI.eliminarCalendarioReporte()}"
+                                             action="#{configuracionBeanUI.habilitador(true)}"
+                                             oncomplete="PF('dlgeliminar').hide()"
+                                             update=":frmCalendario:calendario, growl, :frmCalendario:showEliminarButton, :frmCalendario:showModificarButton"
+                                             immediate="true" ajax="true">
+                            </p:commandButton>
+                            <p:commandButton value="Cancelar" icon="ui-icon-cancel"
+                                             oncomplete="PF('dlgeliminar').hide()"/>
+                        </center>
+                    </p:dialog>
+
+                    <!--Dialogo ALERTAS-->
+                    <p:dialog header="Configuración general de las alertas" resizable="false"
+                              widgetVar="dlgalerta" closable="true" onHide="ovBodyAuto();" onShow="ovBodyHidden();">
+                        <center>
+                            <p:panelGrid columns="1" id="tConfiguracionAlertas"
+                                         style="margin-top: 20px; margin-bottom: 20px; border: none;">
+                                <p:dataTable id="alertas" var="alerta"
+                                             value="#{configuracionBeanUI.configuracionBeanHelper.alertas}"
+                                             rowKey="#{alerta.ALEid}">
+                                    <p:column headerText="Alerta">
+                                        <h:outputText value="#{alerta.ALEtipo}"/>
+                                    </p:column>
+                                    <p:column headerText="Color">
+                                        <p:colorPicker value="#{alerta.ALEcolor}"/>
+
+                                    </p:column>
+                                </p:dataTable>
+                            </p:panelGrid>
+                        </center>
+                        <center>
+                            <p:commandButton value="Aceptar" id="altas" icon="ui-icon-check"
+                                             action="#{configuracionBeanUI.modificarAlertas()}"
+                                             oncomplete="PF('dlgalerta').hide()" update="growl"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-cancel"
+                                             oncomplete="PF('dlgalerta').hide()"/>
+                        </center>
+                    </p:dialog>
+                    <!--Cuadro de diálogo de Mensaje-->
+                    <p:dialog header="Configuración de mensajes" widgetVar="dlgmensaje" resizable="false"
+                              closable="true" height="350" onHide="ovBodyAuto();" onShow="ovBodyHidden();">
+                        <h:panelGrid style="margin-top:20px; position: relative; border:none;">
+                            <p:row>
+                                <p:selectOneMenu id="men"
+                                                 value="#{configuracionBeanUI.configuracionBeanHelper.mensaje.MENid}">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="0"/>
+                                    <f:selectItems value="#{configuracionBeanUI.configuracionBeanHelper.mensajes}"
+                                                   var="mensaje" itemLabel="#{mensaje.alertaALEid.ALEtipo}"
+                                                   itemValue="#{mensaje.MENid}"/>
+                                    <p:ajax update=":frmCalendario:msj, :frmCalendario:men" event="change"
+                                            listener="#{configuracionBeanUI.changeMensajeListener(configuracionBeanUI.configuracionBeanHelper.mensaje.MENid)}"/>
+                                </p:selectOneMenu>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:inputTextarea id="msj" value="#{configuracionBeanUI.mensaje.MENmensaje}"
+                                                     rows="10" cols="40">
+                                        <p:ajax event="change"/>
+                                    </p:inputTextarea>
+                                </p:column>
+                                <p:column>
+                                    <h:outputText style="size: 20px"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:commandButton value="Aceptar"
+                                                 actionListener="#{configuracionBeanUI.guardarMensaje()}"
+                                                 icon="ui-icon-check"
+                                                 oncomplete="PF('dlgmensaje').hide()" immediate="true" ajax="true"
+                                                 update="growl"/>
+                                <p:commandButton value="Cancelar" icon="ui-icon-cancel"
+                                                 oncomplete="PF('dlgmensaje').hide()"
+                                                 actionListener="#{configuracionBeanUI.onCloseDialogMensajes()}"/>
+                            </p:row>
+                        </h:panelGrid>
+                        <p:ajax event="close" listener="#{configuracionBeanUI.onCloseDialogMensajes()}"
+                                resetValues="true"
+                                update=":frmCalendario:msj, :frmCalendario:men"/>
+                    </p:dialog>
+                </h:form>
+
+                <!-- Inicio de CicloEscolar -->
+                <h:form id="frmCicloEscolar">
+                    <!-- Este dialogo se manda llamar cuando se le da click al boton agregar, eliminar o modificar -->
+                    <p:growl id="growl" showDetail="true" life="5000"/>
+                    <p:dialog id="capdlg"
+                              onHide="ovBodyAuto();" onShow="ovBodyHidden();"
+                              style="font-weight: bold;"
+                              header="#{configuracionBeanUI.header}"
+                              widgetVar="dlg" draggable="false"
+                              resizable="false" showEffect="fade"
+                              hideEffect="explode" modal="true">
+                        <p:ajax event="close"
+                                update=":frmCalendario:showEliminarButtonCE, :frmCalendario:showMostrarButtonCE"
+                                listener="#{configuracionBeanUI.limpiarSeleccion()}"
+                                onsuccess="location.reload()"/>
+
+                        <p:panelGrid style="margin-top:20px; position: relative" id="capCE">
+                            <p:row>
+                                <p:column style="font-weight: bold;">
+                                    <p:outputLabel value="Ciclo escolar"/>
+                                </p:column>
+                                <p:column style="font-weight: bold;">
+
+                                    <p:inputMask
+                                            value="#{configuracionBeanUI.configuracionBeanHelper.cicloescolar.CEScicloEscolar}"
+                                            maxlength="6"
+                                            disabled="#{configuracionBeanUI.deshabilitar}"
+                                            mask="9999-9">
+                                        <p:keyFilter regEx="/[0-9]/"/>
+                                    </p:inputMask>
+
+
+                                </p:column>
+
+                            </p:row>
+                        </p:panelGrid>
+
+                        <p:commandButton value="Aceptar"
+                                         action="#{configuracionBeanUI.onClickSubmit()}"
+                                         update=":frmCicloEscolar:growl,capCE"
+
+                                         style="margin-left: 70px; margin-top: 10px; font-weight: bold;"
+                        >
+
+                            <p:ajax event="click"
+                                    oncomplete="PF('dlg').show();">
+
+                            </p:ajax>
+                        </p:commandButton>
+                        <p:commandButton value="Cancelar"
+                                         oncomplete="PF('dlg').hide()"
+                                         onclick="location.reload()"
+                                         update=":frmCicloEscolar:capdlg,capCE" style="font-weight: bold;">
+
+                            <p:ajax event="click"
+                                    update=":frmCalendario:showEliminarButtonCE,:frmCalendario:showMostrarButtonCE,frmCicloEscolar:capCE"
+                                    listener="#{configuracionBeanUI.limpiarSeleccion()}"
+                                    onsuccess="location.reload()"></p:ajax>
+
+                        </p:commandButton>
+
+
+                    </p:dialog>
+                    <!-- Termina form de ciclo escolar -->
+                </h:form>
+                <!-- DIALOG DE ELIMINAR CICLO ESCOLAR -->
+                <p:confirmDialog id="confirmdlgId"
+                                 showEffect="fade"
+                                 hideEffect="explode"
+                                 widgetVar="confirmdlg"
+                                 header="Confirmación"
+                                 message="¿Está seguro de eliminar el registro?"
+                                 severity="alert"
+                                 appendTo="@(body)"
+                                 style="font-weight: bold;">
+                    <h:form>
+
+                        <p:commandButton value="Aceptar"
+                                         action="#{configuracionBeanUI.confirmacionAceptada()}"
+                                         icon="ui-icon-check"
+                                         style="font-weight: bold;  margin-left: 50px;"
+
+                                         update=":frmCicloEscolar:growl,:frmCicloEscolar:capdlg"
+                        >
+
+
+                            <p:ajax event="click"
+                                    update=":frmCalendario:showEliminarButtonCE,:frmCalendario:showMostrarButtonCE,:frmCalendario:cap"
+                                    listener="#{configuracionBeanUI.esconderBotones()}"></p:ajax>
+                        </p:commandButton>
+                        <p:commandButton value="Cancelar"
+                                         oncomplete="PF('confirmdlg').hide()"
+
+                                         icon="ui-icon-close"
+                                         update=":frmCicloEscolar:growl"
+                                         style="font-weight: bold;"
+                        >
+
+                        </p:commandButton>
+                    </h:form>
+                </p:confirmDialog>
+
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>No tienes permisos para ver esto</h1></center>
+
+                </h:form>
+
+
+            </h:body>
+        </f:view>
+    </ui:define>
+</ui:composition>

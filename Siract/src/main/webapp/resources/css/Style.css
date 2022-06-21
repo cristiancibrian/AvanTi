@@ -1,0 +1,189 @@
+/* 
+    Document   : Style
+    Created on : Jan 14, 2014, 8:31:02 AM
+    Author     : Cesar Favela primera versión
+    Author     : Jocelyn seguna versión
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+.selectable td.ui-selection-column input {
+   display:none;
+   color: red;
+   height: 400px;
+   width: 900px;
+   border-color: red;
+   background-color: green;
+}
+
+.ui-icon-NoteBlank {   
+    margin:auto;
+    border-radius: 0px;
+    background-size: cover;
+    width: 20px;
+    background-image: url("#{resource['imagenes:NoteWrite.png']}")!important;
+
+}  
+
+.ui-icon-NoteWrite{   
+    margin: auto;
+    margin-left: 0px;
+    margin-top: 0px;
+    border-radius: 0px;
+        width: 25px;
+
+    background-size: cover;
+    background-image: url("#{resource['imagenes:NoteBlank.png']}")!important;
+
+
+}  
+
+
+body{ 
+    background-color: #007040 !important;/*pinta el lienzo de verde*/
+    margin: 2%;/*Disminiuye la pagina en %*/
+    height: 50%;
+    overflow: auto;  
+}
+#enlaces{
+    margin-left: 65%;/*acomoda los botones de cerrar sesion e inicio*/
+    border: 2px;
+    color: #000;/*lo cambie #F1A733*/
+    resize: horizontal;
+}
+#anteencabezado{
+    margin-left: 65%;/*acomoda los botones de cerrar sesion e inicio*/
+    border: 2px;
+    color: #000;/*lo cambie #F1A733*/
+    resize: horizontal;
+}
+#encabezado{
+    color: #000;
+}
+#pie{
+    font-size: 8px;
+    color: #F1A733;/*color de la fuente del pie*/
+
+}
+#menu{
+    font-size: 15px;
+
+}
+#panelgrid{
+    width: 100%;
+    height: 100%; 
+    margin-top: 5px;
+    box-shadow: 0px -5px 0px 0px #F1A733;/*crea la sombra del cuadro de la pagina#F1A733 */
+
+}
+.ui-table .tr{
+    color: #000;
+}
+
+#contenido {
+    color: #000000;/*le da el color a la fuente del contenido*/
+    width:100%; height:600px;/* le da ancho y largo fijo a la parte del centro*/
+}
+
+.ui-panelgrid tr { 
+}
+.ui-scrollpanel {
+    border:0 !important; /*Con esta linea se le quita el borde del panel (EL CUAL ESTA EN EL AREA DEL CENTRO DE LA PAGINA)*/
+}
+.ui-menu{
+    border:0 !important; /*Con esta linea se le quita el borde que primefaces dibuja al menu*/ 
+}
+.iconcatalogo{
+    background: url("../resources/imagenes/Catalog.png") !important;
+
+}
+.logo{
+    width: 500px;
+    height: 80px;
+}
+
+.cabeza{
+    width: 200px;
+    text-align: center;
+    font-weight: bold;
+    color: #ffffff;
+    border: 1px solid #327e04 !important;
+    background: #459e00;
+}
+
+.ui-button.EncabezadoButtons{
+    background-image: none !important;
+    color: black !important;
+    background-color: transparent !important;
+    border: 0px !important;
+    font-weight: normal !important;
+    font-size: 16px !important;
+}
+.ui-button.EncabezadoButtons:hover{
+    box-shadow: 0px 0px 0px 1px #327e04 inset !important;
+    background: #78B641 !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+}
+
+/*
+.fa-cogs{
+    color: #A3A3A3;
+}.fa-users{
+    color: #4267b2;
+}.fa-user{
+    color: #4267b2;
+}.fa-bar-chart{
+    color: #BF0000;
+}.fa-list-alt{
+    color: #BF0000;
+}.fa-edit{
+    color: #f1a733;
+}.fa-support{
+    color: #BF0000;
+}.fa-home{
+    color: #327e04;
+}.fa-sign-out{
+    color: #327e04;
+}*/
+
+/*Colores de cada icono*/
+.fa-cogs{/*CONFIGURACION*/
+    color: #327e04;
+}.fa-users{     /*ROL*/
+    color: #327e04;
+}.fa-user{      /*USUARIOS*/
+    color: #327e04;
+}.fa-bar-chart{ /*REPORTES*/
+    color: #327e04;
+}.fa-list-alt{  /*RACT CONSULTAS*/
+    color: #327e04;
+}.fa-edit{      /*RACT*/
+    color: #327e04;
+}.fa-question-circle{   /*AYUDA*/
+    color: #327e04;
+}.fa-home{      /*INICIO*/
+    color: #327e04;
+}.fa-sign-out{  /*CERRAR SESION*/
+    color: #327e04;
+}.fa-wrench{    /*MANTENIMIENTOS*/
+    color: #327e04;
+}.fa-tachometer{/*SEMAFOROS*/
+    color: #327e04;
+}.fa-file{/*POLITICA DE EVALUACION*/
+    color: #327e04;
+}
+/*  Se hace target a los iconos del menu y encabezado para que se vuelvan 
+    blancos al colocarse sobre el boton en el que se encuentran*/
+.ui-button.EncabezadoButtons:hover .fa{
+    color: #FFFFFF;
+}.ui-menuitem:hover .fa{
+    color: #FFFFFF;
+}
+
+.miclase{
+    background: #459e00  50% 50% repeat-x !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+}

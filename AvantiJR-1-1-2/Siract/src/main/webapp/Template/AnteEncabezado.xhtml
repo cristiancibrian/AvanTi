@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core" 
+      xmlns:p="http://primefaces.org/ui">
+    <f:view contentType="text/html">
+        <h:head>
+            <h:outputStylesheet name="Style.css" library="css"/>
+        </h:head>
+        
+        <h:body>
+            <h:form  onkeydown="return false;" style="margin-left: 48%;">
+                <p:commandButton class="EncabezadoButtons" value="Inicio" title="Ir al Inicio de SIRACT" action="#{loginBean.index()}" icon="fa fa-fw fa-home" style="font-size: 18px !important;"> 
+                </p:commandButton>
+               
+                <p:commandButton class="EncabezadoButtons" value="Ayuda" action="AyudaVideo" icon="fa fa-fw fa-question-circle" style="font-size: 18px !important;"> 
+                </p:commandButton>
+                
+                <i class="fa fa-fw fa-user"></i>
+                <!--<i styleClass="EncabezadoButtons" class="fa fa-fw fa-users"></i>-->
+                <div style="width: 100%; display: inline;">
+                <p:selectOneMenu class="EncabezadoSOM" style="width:30%;" id="r"  value="#{loginBean.rolMenu}"  effect="" rendered="#{loginBean.selectRol}" maxlength="0" editable="false" autoWidth="false">
+                <f:selectItems var="rol" value="#{loginBean.roles}" itemLabel="#{rol.ROLtipo}" itemValue="#{rol.ROLtipo}"/>
+                <p:ajax event="valueChange" oncomplete="window.location.replace(window.location.href='index.xhtml');"  listener="#{loginBean.onClickSubmitPermiso2()}" />
+                </p:selectOneMenu></div>
+                
+                <p:commandButton class="EncabezadoButtons" value="Cerrar Sesión" title="Cerrar Sesión" action="#{loginBean.doActionSalir()}" icon="fa fa-fw fa-sign-out" style="font-size: 18px !important;"> 
+                </p:commandButton>
+            </h:form>     
+        </h:body>
+
+    </f:view>
+    <script type="text/javascript">
+        function handleLoginRequest(xhr, status, args) {
+            if (args.loggerOut) {
+                location.href = args.ruta;
+            }
+        }
+    </script>
+</html>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="mx.avanti.siract_entity_jar_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>mx.avanti.siract.entity.Usuario</class>
+    <class>mx.avanti.siract.entity.Areaconocimiento</class>
+    <class>mx.avanti.siract.entity.Unidadaprendizaje</class>
+    <class>mx.avanti.siract.entity.ProfesorPerteneceProgramaeducativo</class>
+    <class>mx.avanti.siract.entity.Programaeducativo</class>
+    <class>mx.avanti.siract.entity.Practicalaboratorio</class>
+    <class>mx.avanti.siract.entity.Rol</class>
+    <class>mx.avanti.siract.entity.Coordinadorareaadministrativa</class>
+    <class>mx.avanti.siract.entity.Charges</class>
+    <class>mx.avanti.siract.entity.Subtemaunidad</class>
+    <class>mx.avanti.siract.entity.Configuracion</class>
+    <class>mx.avanti.siract.entity.Mensaje</class>
+    <class>mx.avanti.siract.entity.Campus</class>
+    <class>mx.avanti.siract.entity.Unidad</class>
+    <class>mx.avanti.siract.entity.Temaunidad</class>
+    <class>mx.avanti.siract.entity.Profesor</class>
+    <class>mx.avanti.siract.entity.Cicloescolar</class>
+    <class>mx.avanti.siract.entity.RolHasPermiso</class>
+    <class>mx.avanti.siract.entity.Practicasclinica</class>
+    <class>mx.avanti.siract.entity.Unidadacademica</class>
+    <class>mx.avanti.siract.entity.Permiso</class>
+    <class>mx.avanti.siract.entity.Unidadacademicatipo</class>
+    <class>mx.avanti.siract.entity.Calendarioreporte</class>
+    <class>mx.avanti.siract.entity.Products</class>
+    <class>mx.avanti.siract.entity.Grupo</class>
+    <class>mx.avanti.siract.entity.CalendarioreporteTieneAlerta</class>
+    <class>mx.avanti.siract.entity.Areaadministrativa</class>
+    <class>mx.avanti.siract.entity.UnidadaprendizajeImparteProfesor</class>
+    <class>mx.avanti.siract.entity.UnidadaprendizajeTieneContenidotematico</class>
+    <class>mx.avanti.siract.entity.Practicascampo</class>
+    <class>mx.avanti.siract.entity.Reporte</class>
+    <class>mx.avanti.siract.entity.Alerta</class>
+    <class>mx.avanti.siract.entity.Catalogoreportes</class>
+    <class>mx.avanti.siract.entity.Practicataller</class>
+    <class>mx.avanti.siract.entity.Reporteavancecontenidotematico</class>
+    <class>mx.avanti.siract.entity.Planestudio</class>
+    <class>mx.avanti.siract.entity.Events</class>
+    <class>mx.avanti.siract.entity.Subpermisos</class>
+    <class>mx.avanti.siract.entity.Alumno</class>
+    <class>mx.avanti.siract.entity.Criterioevaluacion</class>
+    <class>mx.avanti.siract.entity.PoliticaTieneCriterio</class>
+    <class>mx.avanti.siract.entity.Politicaevaluacion</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/siract?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="unatardefue1"/>
+    </properties>
+  </persistence-unit>
+</persistence>

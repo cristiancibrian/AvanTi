@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 17/03/2016 10:10:18 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="mx.avanti.siract.entity.Cicloescolar" table="cicloescolar" catalog="siract" optimistic-lock="version">
+        <id name="cesid" type="java.lang.Integer">
+            <column name="CESid" />
+            <generator class="identity" />
+        </id>
+        <property name="cescicloEscolar" type="string">
+            <column name="CEScicloEscolar" length="6" />
+        </property>
+        <set name="unidadaprendizajes" table="unidadaprendizaje" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="CicloEscolar_CESid" />
+            </key>
+            <one-to-many class="mx.avanti.siract.entity.Unidadaprendizaje" />
+        </set>
+        <set name="configuracions" table="configuracion" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="CicloEscolar_CESid" />
+            </key>
+            <one-to-many class="mx.avanti.siract.entity.Configuracion" />
+        </set>
+        <set name="profesorPerteneceProgramaeducativos" table="profesor_pertenece_programaeducativo" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="CicloEscolar_CESid" not-null="true" />
+            </key>
+            <one-to-many class="mx.avanti.siract.entity.ProfesorPerteneceProgramaeducativo" />
+        </set>
+        <set name="unidadaprendizajeImparteProfesors" table="unidadaprendizaje_imparte_profesor" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="CicloEscolar_CESid" not-null="true" />
+            </key>
+            <one-to-many class="mx.avanti.siract.entity.UnidadaprendizajeImparteProfesor" />
+        </set>
+    </class>
+</hibernate-mapping>

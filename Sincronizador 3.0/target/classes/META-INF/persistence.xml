@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="mx.desarrollo_SincronizadorSiract2.0_jar_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>entidades.Reporte</class>
+    <class>entidades.Catalogoreportes</class>
+    <class>entidades.Calendarioreporte</class>
+    <class>entidades.Practicasclinica</class>
+    <class>entidades.Campus</class>
+    <class>entidades.Subpermisos</class>
+    <class>entidades.Coordinadorareaadministrativa</class>
+    <class>entidades.Planestudio</class>
+    <class>entidades.CalendarioreporteTieneAlerta</class>
+    <class>entidades.Programaeducativo</class>
+    <class>entidades.Permiso</class>
+    <class>entidades.UnidadaprendizajeImparteProfesor</class>
+    <class>entidades.Reporteavancecontenidotematico</class>
+    <class>entidades.Unidadacademica</class>
+    <class>entidades.Areaconocimiento</class>
+    <class>entidades.UnidadaprendizajeTieneContenidotematico</class>
+    <class>entidades.Mensaje</class>
+    <class>entidades.Practicataller</class>
+    <class>entidades.Events</class>
+    <class>entidades.Alerta</class>
+    <class>entidades.Areaadministrativa</class>
+    <class>entidades.Unidadaprendizaje</class>
+    <class>entidades.Usuario</class>
+    <class>entidades.Products</class>
+    <class>entidades.Subtemaunidad</class>
+    <class>entidades.ProfesorPerteneceProgramaeducativo</class>
+    <class>entidades.Unidadacademicatipo</class>
+    <class>entidades.Grupo</class>
+    <class>entidades.Practicalaboratorio</class>
+    <class>entidades.Practicascampo</class>
+    <class>entidades.RolHasPermiso</class>
+    <class>entidades.Rol</class>
+    <class>entidades.Unidad</class>
+    <class>entidades.Charges</class>
+    <class>entidades.Profesor</class>
+    <class>entidades.Cicloescolar</class>
+    <class>entidades.Configuracion</class>
+    <class>entidades.Temaunidad</class>
+    <class>entidades.AlumnoPerteneceGrupo</class>
+    <class>entidades.Alumno</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/siract?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="root"/>
+    </properties>
+  </persistence-unit>
+</persistence>

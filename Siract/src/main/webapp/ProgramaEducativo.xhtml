@@ -1,0 +1,335 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+--> 
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html">  
+
+
+            <h:head>
+                <h:outputStylesheet name="Style_botones.css" library="css"/>
+                <f:facet name="first">
+
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Programa educativo</title> 
+                </f:facet>
+            </h:head>
+            <h:body onload="#{programaEducativoBeanUI.filtrado()}" onkeydown="if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }">
+                
+                <h:form id="formProg" rendered="#{loginBean.permisoGeneral(programaEducativoBeanUI.IDCATALOGOADMIPROGRAEDUCATIVO)}">                
+                    <p:fieldset legend="Programa educativo"> 
+                        <p:growl id="growl" showDetail="true" life="10000"/>   
+                        <p:commandButton icon="fa fa-fw fa-plus"
+                                         id="showAltaButton"                                       
+                                         oncomplete="PF('dlg').show()"
+                                         iconPos="center" 
+                                         title="Agregar"
+                                         actionListener="#{programaEducativoBeanUI.nuevo}" 
+                                         rendered="#{loginBean.permisoAlta}"
+                                         update="capdlg"/>
+
+                        <p:commandButton disabled="#{programaEducativoBeanUI.botonesModElim()}"
+                                          icon="fa fa-fw fa-minus-circle" 
+                                         title="#{programaEducativoBeanUI.tooltip(1)}"
+                                         id="showEliminarButton" 
+                                         oncomplete="PF('dlg').show()"
+                                         iconPos="center"
+                                         actionListener="#{programaEducativoBeanUI.eliminar()}"
+                                         rendered="#{loginBean.permisoBaja}"
+                                         update="capdlg"
+                                         />
+
+                        <p:commandButton icon="fa fa-fw fa-pencil-square-o"
+                                         disabled="#{programaEducativoBeanUI.botonesModElim()}"
+                                         title="#{programaEducativoBeanUI.tooltip(2)}"
+                                         id="showModificarButton"
+                                         oncomplete="PF('dlg').show()"
+                                         actionListener="#{programaEducativoBeanUI.modificar()}"
+                                         iconPos="center"      
+                                         rendered="#{loginBean.permisoModificar}"
+                                         update="capdlg,:formProg:edu,:formProg:showEliminarButton,:formProg:showModificarButton,:formProg:cap,:formProg:seleccionados"
+                                         />
+                        
+                        <p:commandButton id="exportPDF" icon="fa fa-fw fa-file-pdf-o" 
+                                         disabled="#{!programaEducativoBeanUI.imprimir}"
+                                         onclick="PrimeFaces.monitorDownload(start, stop);"
+                                         actionListener="#{programaEducativoBeanUI.preProcessPDF}"
+                                         >
+                            <p:fileDownload value="#{programaEducativoBeanUI.file}"/>
+                        </p:commandButton>
+
+                        <script type="text/javascript">
+                            function test(xhr, status, args) {
+                                if (args.unselecttest % 2 == 1) {
+                                    stest.unselectAllRows();
+                                }
+                            }
+                        </script>
+                        <br/><br/>
+
+                        <div id="selecCAM" style="display: inline-block">
+                            <p:outputLabel value="Seleccione un campus" />
+                            <br/>
+                            <p:selectOneMenu  value="#{programaEducativoBeanUI.selectedCampus}">
+                                <f:selectItem itemLabel="Seleccionar todos"  itemValue=""/>  
+                                            <f:selectItems value="#{programaEducativoBeanUI.listaCampus}" 
+                                                           var="campus"
+                                                           itemLabel="#{campus.CAMnombre}"
+                                                           itemValue="#{campus.CAMid}"/>
+                                          <p:ajax event="valueChange"  listener="#{programaEducativoBeanUI.onChangeCampus()}" 
+                                                  update="selectPE, edu, edu, exportPDF"/>  
+                            </p:selectOneMenu>
+                        </div>
+                        <div id="selecPE" style="display: inline-block">
+                            <p:outputLabel value="Seleccione una unidad académica" 
+                                           style="margin-top: 40%;"
+                                           rendered="#{programaEducativoBeanUI.renderUA}"/><br/>
+                            <p:selectOneMenu  id="selectPE" value="#{programaEducativoBeanUI.programaEducativoBeanHelper.filtroUAC.UACid}"
+                                              filter="true" filterMatchMode="contains" style="width: 600px" >  
+                                            <p:ajax event="valueChange" update="edu, exportPDF" listener="#{programaEducativoBeanUI.filtrado()}"></p:ajax>
+
+                                            <f:selectItem itemLabel="Seleccionar todos" itemValue="#{0}" />  
+                                            <f:selectItems value="#{programaEducativoBeanUI.listaUnidad}" 
+                                                           var="uni"
+                                                           itemLabel="#{uni.UACnombre}"
+                                                           itemValue="#{uni.UACid}"/>  
+                                        </p:selectOneMenu>
+                        </div>
+                        <div id="divFiltro" style="text-align: right;">       
+                            <p:outputLabel style="font-size: 19px" value="Búsqueda específica de programa educativo "/>
+
+                            <p:inputText id="filtro" 
+                                         value="#{programaEducativoBeanUI.busqueda}" 
+                                         autocomplete="off"
+                                         label="filtrado"
+                                         style="text-transform:uppercase;"
+                                         >
+                                <p:ajax event="keyup"  listener="#{programaEducativoBeanUI.filtrado()}" 
+                                        update="edu, exportPDF" />
+                            </p:inputText>
+                            <p:keyFilter for="filtro" regEx="/[a-z 0-9 \s A-Z]/"/>
+                        </div>
+                        <p:dataTable id="edu" var="programa" 
+                                     value="#{programaEducativoBeanUI.listaFiltrada}"
+                                     rowKey="#{programa.PEDid}"
+                                     selection="#{programaEducativoBeanUI.programaEducativoBeanHelper.listaSeleccionPe}"
+                                     rows="10"                                 
+                                     rowsPerPageTemplate="5,10,15,20"
+                                     paginator="true"
+                                     rowSelectMode="add"  
+                                     widgetVar="stest"   
+                                     paginatorTemplate="{CurrentPageReport}  
+                                     {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                     {NextPageLink} {LastPageLink} 
+                                     {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="({currentPage} de {totalPages})"                                 
+                                     emptyMessage="No se encontraron registros a mostrar"                                 
+                                     >
+                            <p:ajax event="rowSelect" update=":formProg:showEliminarButton,:formProg:showModificarButton">
+                            </p:ajax>                        
+                            <p:ajax event="rowUnselect" listener="#{programaEducativoBeanUI.onRowUnselect}" update=":formProg:showEliminarButton,:formProg:showModificarButton">
+
+                            </p:ajax>  
+                            <p:ajax event="rowSelectCheckbox" update=":formProg:showEliminarButton,:formProg:showModificarButton"></p:ajax>
+
+                            <p:ajax event="rowUnselectCheckbox" update=":formProg:showEliminarButton,:formProg:showModificarButton"></p:ajax>
+                            <p:ajax event="toggleSelect" update=":formProg:showEliminarButton, :formProg:showModificarButton"/>
+
+
+
+                            <p:column selectionMode="multiple" 
+                                      style="width:16px;text-align:center">                               
+                            </p:column>
+                            <p:column headerText="Unidad académica" rendered="#{programaEducativoBeanUI.renderUA}">  
+                                <h:outputText value="#{programa.unidadAcademicaUACid.UACnombre}" />  
+                            </p:column> 
+                            <p:column headerText="Clave del programa educativo">  
+                                <h:outputText value="#{programa.PEDclave}" />  
+                            </p:column>  
+                            <p:column headerText="Nombre del programa educativo">  
+                                <h:outputText value="#{programa.PEDnombre}" />  
+                            </p:column>  
+                        </p:dataTable> 
+
+                        <p:dialog id="capdlg" 
+                                  header="#{programaEducativoBeanUI.header}"
+                                  widgetVar="dlg" resizable="false" 
+                                  showEffect="fade" hideEffect="explode"
+                                  modal="true"
+                                  draggable="false"
+                                  closable="true"
+                                  closeOnEscape="true">  
+                            <p:ajax event="close" update=":formProg:edu,:formProg:showEliminarButton,:formProg:showModificarButton,:formProg:cap"
+                                    listener="#{programaEducativoBeanUI.limpiarSeleccion()}"/>
+                            
+                            <h:panelGroup id="selecs" rendered="#{programaEducativoBeanUI.mostrarSeleccionPe()}" >
+                                <p:outputLabel rendered="#{programaEducativoBeanUI.mostrarSeleccionPe()}"
+                                               value="Seleccione el registro a visualizar "></p:outputLabel>
+                                <p:selectOneMenu id="seleccionados" 
+                                                 value="#{programaEducativoBeanUI.programaEducativoBeanHelper.selecProgramaEducativo.PEDid}"                                                    
+                                                 rendered="#{programaEducativoBeanUI.mostrarSeleccionPe()}">
+                                    <p:autoUpdate/>
+                                    <p:ajax event="valueChange" update="cap"
+                                            listener="#{programaEducativoBeanUI.onChangeProgramaEducativo()}"></p:ajax>
+                                    
+                                    <f:selectItems value="#{programaEducativoBeanUI.programaEducativoBeanHelper.listaSeleccionPe}"                                             
+                                                   var="pro" 
+                                                   itemLabel="#{pro.PEDnombre}"
+                                                   itemValue="#{pro.PEDid}"/>                                             
+
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            
+                            <p:panelGrid id="cap" style="margin-top: 20px; position: relative"> 
+
+                                <p:row rendered="#{programaEducativoBeanUI.renderUA}">
+                                    <p:column>Unidad académica</p:column>  
+                                    <p:column>
+                                        <p:selectOneMenu id="progra" value="#{programaEducativoBeanUI.programaEducativoBeanHelper.unidadacademica.UACid}"
+                                                         disabled="#{programaEducativoBeanUI.deshabilitar}" 
+                                                         autoWidth="false"
+                                                         style="width: 400px;" filter="true" filterMatchMode="contains">  
+                                            <f:selectItem itemLabel="-- Seleccione unidad académica --" itemValue="#{0}" />  
+                                            <f:selectItems value="#{unidadAcademicaBeanUI.listaUnidadAcademica}" 
+                                                           var="uni"
+                                                           itemLabel="#{uni.UACnombre}"
+                                                           itemValue="#{uni.UACid}"/>  
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>  Nombre del programa educativo</p:column> 
+                                    <p:column>
+                                        <p:inputText  value="#{programaEducativoBeanUI.programaEducativoBeanHelper.programaEducativo.PEDnombre}"
+                                                     disabled="#{programaEducativoBeanUI.deshabilitarModificar}" 
+                                                           onkeyup="value = value.toUpperCase()"
+                                                           size="40"
+                                                           style="text-transform:uppercase;">
+                                            <p:keyFilter  regEx="/[a-zA-Z\s]/i"/>
+                                        </p:inputText>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column>Clave del programa educativo</p:column> 
+                                    <p:column>
+                                        <p:inputMask mask="99999" 
+                                                     value="#{programaEducativoBeanUI.programaEducativoBeanHelper.programaEducativo.PEDclave}"
+                                                     disabled="#{programaEducativoBeanUI.deshabilitar}"
+                                                           size="6" maxlength="5">
+                                            <p:keyFilter mask="99999" regEx="/[0-9]/"/>
+                                                     </p:inputMask>
+                                    </p:column>
+                                </p:row>
+
+                            </p:panelGrid> 
+                            <center>
+                                <p:commandButton value="Aceptar" 
+                                                 icon="fa fa-fw fa-check" 
+                                                 action="#{programaEducativoBeanUI.onClickSubmit()}"
+                                                 
+                                                 update="seleccionados,:formProg:growl,cap,selecs,:formProg:edu,:formProg:seleccionados,:confirmdlgId, exportPDF">
+                                 <p:ajax event="click" update="exportPDF" listener="#{programaEducativoBeanUI.filtrado()}"></p:ajax>
+
+                                </p:commandButton>
+                                <p:commandButton value="Cancelar" icon="fa fa-fw fa-times"
+                                                 oncomplete="PF('dlg').hide()" 
+                                                 update=":formProg:edu,:formProg:seleccionados,:formProg:capdlg">
+                                    <p:ajax event="click" 
+                                            update=":formProg:edu,:formProg:showEliminarButton,:formProg:showModificarButton,:formProg:cap,:formProg:seleccionados"
+                                            listener="#{programaEducativoBeanUI.limpiarSeleccion()}" >
+                                    </p:ajax>   
+                                </p:commandButton>  
+                            </center>
+                        </p:dialog>
+
+
+                    </p:fieldset> 
+                </h:form> 
+                <p:confirmDialog id="confirmdlgDlt"
+                                 showEffect="fade"
+                                 hideEffect="explode" 
+                                 widgetVar="confdlgElim" 
+                                 header="Confirmación"
+                                 message="¿Está seguro de eliminar el registro?"
+                                 severity="alert"
+                                 appendTo="@(body)" 
+                                 style="font-weight: bold;"
+                                 >
+                    <h:form>
+
+                        <p:commandButton value="Aceptar"
+                                         action="#{programaEducativoBeanUI.confirmacionAceptada()}"                                             
+                                         icon="ui-icon-check"
+                                         style="font-weight: bold;  margin-left: 50px;"
+                                         update=":formProg:capdlg,:formProg:selecs,:formProg:seleccionados"
+                                         >
+
+                            <p:ajax event="click" 
+                                    update=":formProg:growl,:formProg:showEliminarButton,:formProg:showModificarButton,:formProg:exportPDF,:formProg:seleccionados,:formProg:edu"
+                                    listener="#{programaEducativoBeanUI.esconderBotones()}"></p:ajax>
+                        </p:commandButton>
+                        <p:commandButton value="Cancelar"
+                                         oncomplete="PF('confirmdlg').hide()"
+                                         icon="ui-icon-close" 
+                                         style="font-weight: bold;">      
+
+                        </p:commandButton>
+                    </h:form>  
+                </p:confirmDialog>             
+
+                
+                <p:confirmDialog id="confirmdlgId" 
+                                 showEffect="fade"
+                                 hideEffect="explode" 
+                                 widgetVar="confirmdlg" 
+                                 header="Confirmación"
+                                 message="#{programaEducativoBeanUI.mensajeConfirm}"
+                                 severity="alert"
+                                 closable="false"
+                                 appendTo="@(body)" 
+                                 >
+                    <h:form>
+                        <center>
+                            <p:commandButton value="Aceptar"
+                                             action="#{programaEducativoBeanUI.confirmacionAceptada()}"                                             
+                                             icon="ui-icon-check"
+                                             style="font-weight: bold;  margin-left: 50px;"
+                                             oncomplete="PF('dlg').show()"
+                                             update=":formProg:growl,:formProg:edu,:formProg:selecs,:formProg:seleccionados,:formProg:cap,:formProg:showEliminarButton,:formProg:showModificarButton,:formProg:selecs,:formProg:exportPDF"
+                                             >
+
+                                <p:ajax event="click" 
+                                        update=":formProg:showEliminarButton,:formProg:showModificarButton,:formProg:seleccionados,:formProg:cap,:formProg:edu"
+                                        listener="#{programaEducativoBeanUI.esconderBotones()}"></p:ajax>
+                            </p:commandButton>
+                            <p:commandButton value="Cancelar"
+                                             oncomplete="PF('confirmdlg').hide()"
+                                             rendered="#{programaEducativoBeanUI.renderCancelar}"
+                                             icon="ui-icon-close" 
+                                             style="font-weight: bold;"      
+                                             action="#PF('confirmdlg').hide()">
+                            </p:commandButton>
+                        </center>
+                    </h:form>  
+                </p:confirmDialog>  
+                
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                        para volver a Siract.</h1></center>
+                </h:form>
+                
+            </h:body>
+        </f:view>
+    </ui:define>
+</ui:composition>

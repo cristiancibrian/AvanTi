@@ -1,0 +1,26 @@
+<component name="libraryTable">
+  <library name="certuit-commons-security-1.0.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/certuit-commons-security-1.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/jargs-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/jcip-annotations-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/jcl-over-slf4j-1.7.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/jstl-api-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/jstl-impl-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/opensaml-2.2.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/openws-1.2.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/security-certuit-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/serializer-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/xercesImpl-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/xml-apis-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/xmlsec-1.4.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/xmltooling-1.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/resolver-2.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/certuit-commons-security-1.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/security-certuit-1.0.jar!/" />
+    </SOURCES>
+  </library>
+</component>

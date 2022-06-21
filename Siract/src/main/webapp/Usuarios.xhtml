@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html">
+            <h:head>
+                <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces"/>
+                <f:facet name="first">
+                    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+                    <title>Usuarios</title>
+                </f:facet>
+            </h:head>
+            <h:body onload="#{usuariosBeanUI.refrescarForma()}">
+                <!-- <h:form id="frmUsuarios" onkeypress="return event.keyCode !== 13" rendered="#{loginBean.tienePermiso}"> -->
+                <h:form id="frmUsuarios" onkeypress="return event.keyCode !== 13"
+                        rendered="#{loginBean.permisoGeneral(usuariosBeanUI.IDCATALOGOADMIUSUARIOS)}">
+                    <p:growl id="msgs" showDetail="false" sticky="false" life="5000" 
+                             transient="true"/>
+
+                    <p:fieldset legend="Administración de usuarios">
+
+                        <p:commandButton title="Agregar Usuario"
+                                         id="showAltaButton"
+                                         oncomplete="PF('dlg').show();"
+                                         icon="fa fa-plus"
+                                         iconPos="center"
+                                         actionListener="#{usuariosBeanUI.nuevo}"
+                                         update="dUsuarios"
+                                         rendered="#{loginBean.permisoAlta}"/>
+
+                        <p:commandButton title="Eliminar Usuario"
+                                         id="showEliminarButton"
+                                         disabled="#{usuariosBeanUI.boton}"
+                                         icon="fa fa-minus-circle"
+                                         oncomplete="PF('dlg').show();"
+                                         iconPos="center"
+                                         actionListener="#{usuariosBeanUI.eliminar}"
+                                         update="dUsuarios"
+                                         rendered="#{loginBean.permisoBaja}"/>
+
+                        <p:commandButton title="Modificar Usuario" id="showMostrarButton"
+                                         disabled="#{usuariosBeanUI.boton}"
+                                         icon="fa fa-edit"
+                                         iconPos="center"
+                                         actionListener="#{usuariosBeanUI.modificar}"
+                                         update="dUsuarios, inputUsu, inputContra, roles"
+                                         rendered="#{loginBean.permisoModificar}"/>
+                        <br/><br/>
+                        Seleccione un rol: <br/>
+                        <div id="divFiltro1" style="display: inline-block">
+                            <p:selectOneMenu id="rolesFiltro"
+                                             filter="false"
+                                             value="#{usuariosBeanUI.rolFiltro.ROLid}"
+                            >
+                                <p:ajax event="valueChange" listener="#{usuariosBeanUI.filtrado()}"
+                                        update="tbUsuarios"></p:ajax>
+                                <f:selectItem itemLabel="Seleccionar todos los roles" itemValue="#{0}"/>
+                                <f:selectItems value="#{usuariosBeanUI.rolesFiltro}"
+                                               var="rol"
+
+                                               itemLabel="#{rol.ROLtipo}"
+                                               itemValue="#{rol.ROLid}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <h:outputText style="margin-left: 32%" value="Búsqueda específica de usuarios: "/>
+                        <p:inputText onkeypress="return event.keyCode!==32" id="globalFilter"
+                                     value="#{usuariosBeanUI.busqueda}" style="width:180px" placeholder="Buscar">
+                            <p:ajax event="keyup" listener="#{usuariosBeanUI.filtrado()}"
+                                    update="tbUsuarios"/>
+                        </p:inputText>
+
+                        <p:dataTable id="tbUsuarios"
+                                     var="usuario"
+                                     value="#{usuariosBeanUI.listaFiltrada}"
+                                     rowKey="#{usuario.USUid}"
+                                     selection="#{usuariosBeanUI.selectedUsuarios}"
+                                     rowSelectMode="remove"
+                                     rows="10"
+                                     paginator="true"
+                                     paginatorTemplate="{CurrentPageReport}
+                                     {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                     {NextPageLink} {LastPageLink} 
+                                     {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="{currentPage} de {totalPages}"
+                                     emptyMessage="No hay registros que mostrar."
+
+                                     rowsPerPageTemplate="5,10,15,20" scrollable="true">
+                            <p:column selectionMode="multiple"
+                                      style="width:16px;text-align:center">
+
+                            </p:column>
+
+                            <p:ajax event="rowSelect" listener="#{usuariosBeanUI.onRowSelect}"
+                                    update=":frmUsuarios:roles,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:seleccionados"></p:ajax>
+                            <p:ajax event="rowUnselect" listener="#{usuariosBeanUI.onRowUnselect}"
+                                    update=":frmUsuarios:roles,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:seleccionados"></p:ajax>
+                            <p:ajax event="rowUnselectCheckbox" listener="#{usuariosBeanUI.onRowUnselect}"
+                                    update=":frmUsuarios:roles,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:seleccionados"></p:ajax>
+                            <p:ajax event="rowSelectCheckbox" listener="#{usuariosBeanUI.onRowSelect}"
+                                    update=":frmUsuarios:roles,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:seleccionados"></p:ajax>
+                            <p:ajax event="toggleSelect" listener="#{usuariosBeanUI.onToggleselect}"
+                                    update=":frmUsuarios:roles,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:seleccionados"/>
+                            <p:column headerText="Usuarios" width="30%">
+                                <h:outputText value="#{usuario.USUusuario}@uabc.edu.mx"/>
+                            </p:column>
+                            <p:column headerText="Profesores" width="30%">
+                                <h:outputText value="#{usuariosBeanUI.profDeUsu(usuario)}"/>
+                            </p:column>
+                            <p:column headerText="Roles" width="30%">
+                                <h:outputText value="#{usuariosBeanUI.rolesStrList(usuario)}"/>
+                            </p:column>
+
+                        </p:dataTable>
+                        <!--</p:outputPanel>-->
+                        <p:dialog style="
+                                  text-align : left;" resizable="false" header="#{usuariosBeanUI.header}"
+                                  widgetVar="dlg" modal="true" id="dUsuarios">
+
+                            <p:ajax event="close" update=":frmUsuarios:inputUsu"/>
+                            <p:ajax event="close" update=":frmUsuarios:inputContra"/>
+                            <p:ajax event="close" update=":frmUsuarios:roles"/>
+
+                            <p:outputLabel id="lblSeleccionados" rendered="#{usuariosBeanUI.multiSeleccion}"
+                                           value="Seleccione el registro a visualizar "></p:outputLabel>
+
+                            <p:selectOneMenu id="seleccionados" value="#{usuariosBeanUI.selectedUsuario.USUid}"
+                                             rendered="#{usuariosBeanUI.multiSeleccion}">
+
+                                <f:selectItems value="#{usuariosBeanUI.selectedUsuarios}"
+                                               var="usuario"
+                                               itemLabel="#{usuario.USUusuario}"
+                                               itemValue="#{usuario.USUid}"/>
+
+                                <p:ajax event="valueChange" listener="#{usuariosBeanUI.selectMultipleUsuario}"
+                                        update=":frmUsuarios:inputContra,:frmUsuarios:seleccionados,:frmUsuarios:inputUsu,:frmUsuarios:roles"/>
+
+
+                            </p:selectOneMenu>
+                            <p:panelGrid style="margin-top: 20px; position: relative" id="capUsuarios">
+                                <p:row>
+
+                                    <p:column>
+                                        <p:outputLabel value="Usuario:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:inputText maxlength="45" onkeypress="return event.keyCode !== 32"
+                                                     id="inputUsu" value="#{usuariosBeanUI.usuario.USUusuario}"
+                                                     disabled="#{usuariosBeanUI.deshabilitar}">
+                                            <p:keyFilter preventPaste="false"
+                                                         regEx="/[A-Za-z0-9_. áéóúíñÁÉÍÓÚÑ,&quot;]/"/>
+                                        </p:inputText>
+                                    </p:column>
+                                    <p:column>
+                                        <p:outputLabel value="Contraseña:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:inputText type="password" id="inputContra"
+                                                     value="#{usuariosBeanUI.usuario.USUcontrasenia}"
+                                                     disabled="#{usuariosBeanUI.deshabilitar}"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:selectCheckboxMenu id="roles" value="#{usuariosBeanUI.obtenerRoles}"
+                                                              disabled="#{usuariosBeanUI.deshabilitar}" rendered="true"
+                                                              label="roles" filter="true" filterMatchMode="startsWith"
+                                                              style="width: 220px; margin-top: 20px;">
+                                            <f:selectItems value="#{usuariosBeanUI.obtenerListaRoles}" var="rol"
+                                                           itemLabel="#{rol.ROLtipo}" itemValue="#{rol.ROLtipo}"/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+
+                                </p:row>
+                            </p:panelGrid>
+                            <div align="center">
+                                <p:commandButton value="Aceptar" action="#{usuariosBeanUI.onClickSubmit()}"
+                                                 update=":frmUsuarios:tbUsuarios,msgs,:frmUsuarios:seleccionados,:frmUsuarios:globalFilter,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:roles"
+                                                 icon="ui-icon-check">
+
+                                    <p:ajax update=" :frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:globalFilter"
+                                            listener="#{usuariosBeanUI.refrescarForma2()}"/>
+
+                                </p:commandButton>
+                                <p:commandButton value="Cancelar"
+                                                 icon="ui-icon-close" oncomplete="PF('dlg').hide();"
+                                                 update=":frmUsuarios:inputUsu,:frmUsuarios:inputContra,:frmUsuarios:roles,:frmUsuarios:tbUsuarios,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:globalFilter">
+
+                                    <p:ajax update=":frmUsuarios:inputUsu,
+                                    :frmUsuarios:inputContra,:frmUsuarios:roles,:frmUsuarios:tbUsuarios,:frmUsuarios:seleccionados,:frmUsuarios:showEliminarButton,:frmUsuarios:showMostrarButton,:frmUsuarios:globalFilter"
+                                            listener="#{usuariosBeanUI.refrescarForma()}"/>
+
+                                </p:commandButton>
+                            </div>
+                        </p:dialog>
+                    </p:fieldset>
+
+                </h:form>
+                <p:confirmDialog id="confirmdlgID"
+                                 showEffect="fade"
+                                 hideEffect="explode"
+                                 widgetVar="confirmdlg"
+                                 header="Confirmación"
+                                 message="¿Está seguro de eliminar el registro?"
+                                 severity="alert"
+                                 appendTo="@(body)">
+                    <h:form style=" display: block;
+                            text-align : center;">
+
+
+                        <p:commandButton value="Si" type="button"
+                                         styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"
+                                         update=":frmUsuarios:seleccionados">
+
+                            <p:ajax listener="#{usuariosBeanUI.onClickSubmit()}" event="click" resetValues="true"
+                                    update=":frmUsuarios:showEliminarButton,
+                                    :frmUsuarios:showMostrarButton,
+                                    :frmUsuarios:seleccionados,
+                                    :frmUsuarios:tbUsuarios,
+                                    :frmUsuarios:inputUsu,
+                                    :frmUsuarios:inputContra,
+                                    :frmUsuarios:roles,
+                                    :frmUsuarios:seleccionados,
+                                    :confirmdlgID"/>
+
+
+                        </p:commandButton>
+                        <p:commandButton value="No"
+                                         type="button"
+                                         onclick="PF('confirmdlg').hide()"
+                                         styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close">
+
+                            <p:ajax event="click" resetValues="true" update=":frmUsuarios:seleccionados"/>
+                            <p:ajax event="click" resetValues="true" listener="#{rolesBeanUI.setConfirmDialogOpen(false)}"/>
+
+                        </p:commandButton>
+
+
+                    </h:form>
+                </p:confirmDialog>
+
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                        para volver a Siract.</h1></center>
+                </h:form>
+
+            </h:body>
+        </f:view>
+    </ui:define>
+</ui:composition>

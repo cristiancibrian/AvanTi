@@ -1,0 +1,937 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+
+        <f:view contentType="text/html">  
+            <h:head>
+
+                <title>SIRACT - Generar Reportes</title> 
+                <script type="text/javascript">
+                    /*Función para colocar los numeros en la cabecera de las barras de la grafica*/
+                    function GraficaBarrasExt() {
+                        
+                        this.cfg.seriesDefaults = {
+                            renderer:$.jqplot.BarRenderer,
+                            pointLabels: {show: true}
+                        };
+                        
+                        this.cfg.highlighter = {
+                            show: false  
+                        };
+                    }
+                    
+                    function showBtnCriterio(criterio) {
+                        $('.opcionesCriterio').css('display', 'none');
+                        $("#forma\\:formulario_" + criterio).css('display', 'block');
+                    }
+
+
+                    function redireccionar() {
+                        location.href = "/Siract/GaugeMetersProgEdu.xhtml";
+
+                    }
+
+                    function exportChart() {
+                        //convierte la grafica del canvas en imagen
+                        img = PF('barrasResultado').exportAsImage();
+                        // la imagen url la enviamos a un campo oculto
+                        document.getElementById('forma:b64').value = img.src;
+                    }
+
+                    function showGraficos(tipoGrafico) {
+                        //var tipoGrafico = document.getElementById(":forma:tipoGrafico").value;
+
+                        $("#forma\\:panel_barras").css('display', 'none');
+                        $("#forma\\:panel_lineas").css('display', 'none');
+                        $("#forma\\:panel_pastel").css('display', 'none');
+
+                        //alert(tipoGrafico);
+
+                        if (tipoGrafico == "barras") {
+                            //$("#forma\\:panel_barras").css('display','block');
+                            $("#forma\\:panel_barras").show();
+                            //PF("barrasResultado").p
+                        }
+                        if (tipoGrafico == "linea") {
+                            $("#forma\\:panel_lineas").css('display', 'block');
+                        }
+                        if (tipoGrafico == "pastel") {
+                            //$("#forma\\:programa_educativo").css('display','block');
+                            $("#forma\\:panel_pastel").css('display', 'block');
+                        }
+                        if (tipoGrafico == "nullo") {
+                            $("#forma\\:panel_barras").css('display', 'none');
+                            $("#forma\\:panel_lineas").css('display', 'none');
+                            $("#forma\\:panel_pastel").css('display', 'none');
+                        }
+
+                    }
+
+                    jQuery(document).ready(function () {
+                        /*$("#forma\\:panel_barras").css('display','none');
+                         $("#forma\\:panel_lineas").css('display','none');
+                         */
+                    });
+                    
+                    
+                </script>
+                
+                <style>
+                    .ui-accordion .ui-accordion-content{
+                    border-top: 0 none;
+                    margin-bottom: 2px;
+                    margin-top: -2px;
+                    overflow: auto;
+                    padding: 0;
+                    position: relative;
+                    top: 1px;
+                    }
+                    
+                    .ui-button-icon-only .ui-icon {
+                    left: 40%;
+                    font-size: 1em;
+                    height: 20px;
+
+                   }
+                   
+                   .ui-tabs-scrollable .ui-tabs-nav{ 
+                       /*Codigo para que se muestren todas las pestañas de Detalles de la Consulta en una sola linea*/ 
+                       width: 15000px; 
+                   }
+                   
+                </style>
+
+
+            </h:head>
+            <h:body onload="#{filtrosBeanUI.mostrarForma()}" >
+                
+                <!-- <h:form rendered="#{loginBean.tienePermiso}" id="forma"> -->
+                
+                <h:form rendered="#{loginBean.permisoGeneral(filtrosBeanUI.IDCATALOGOADMIGENERADOR)}" id="forma">
+                    <p:growl id="growl" for="growl" showDetail="false" sticky="false" life="5000"/> 
+                    <p:growl id="growlSticky" for="growlSticky" sticky="true" showDetail="true"/>
+
+                    <p:panel id="nav" header="Reportes">                  
+
+                        <p:commandButton icon="fa fa-fw fa-search" actionListener="#{filtrosBeanUI.refrescarEntidades()}" id="btnCON" onclick="PF('comunes').show();
+                            showBtnCriterio('#{filtrosBeanUI.criterio}');" disabled="#{!filtrosBeanUI.habilitarBusqueda}"/>
+                        <!--<p:commandButton actionListener="#" value=""  id="btnGC" styleClass="btnAU" onclick="PF('guardarReport').show()" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada" disabled="#{filtrosBeanUI.disableBtnGenerarGrafico()}"/>
+                        <p:commandButton actionListener="#" value="" id="btnMC" styleClass="btnAvance" onclick="PF('modificarReport').show()" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada" disabled="#{filtrosBeanUI.disableBtnGenerarGrafico()}"/>
+                        <p:commandButton actionListener="#" value="" id="btnELC" styleClass="btnCancelar" onclick="PF('eliminarReport').show()" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada" disabled="#{filtrosBeanUI.disableBtnGenerarGrafico()}"/>                    
+                        <p:commandButton actionListener="#" value="" id="btnEJC" styleClass="btnReportePer" onclick="PF('ejecutarReportGuardado').show()" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada"  />                   
+                        --><p:commandButton icon="fa fa-fw fa-file-excel-o" id="btnExl" ajax="no" actionListener="#{filtrosBeanUI.exportarExcel()}" onclick="exportChart();" disabled="#{filtrosBeanUI.generarExl}"  />                                                                                                
+                        
+                        <!--  //En el reestructurado venia asi <p:commandButton onclick="window.location.replace(window.location.href='SemaforosDirector.xhtml');" id="btnSemaf" rendered="#{filtrosBeanUI.directorOrAdmin}" styleClass="btnSemaforo"  value="" update="forma:BarChart :forma:LineChart pieChart table sample :formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada" />-->
+                        
+                        <!--<p:commandButton onclick="window.location.replace(window.location.href = 'SemaforosDirector.xhtml');" id="btnSemaf" rendered="#{filtrosBeanUI.directorOrAdmin}" styleClass="btnSemaforo"  value="" update="accordion:BarChart :formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada" />
+                        -->
+                        <!--<p:commandButton actionListener="#" rendered="#{filtrosBeanUI.directorOrAdmin}" value="" id="btnExl2" styleClass="btnExcel2"   onclick="PF('ejecutarReporteGeneral').show()"/>                                                                             
+                        <center>
+
+                            <p:panelGrid columns="2">
+
+                                <p:row>                    
+                                    <p:column><h:outputText value="Nombre de la consulta guardada:"/></p:column></p:row><p:row><p:column>
+                                        <p:selectOneMenu id="catalogoreportes3"  value="#{filtrosBeanUI.CTRnombre}">                                     
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                            <f:selectItems value="#{filtrosBeanUI.listaCatalogoReportes}" var="catalogoreporte3" itemLabel="#{catalogoreporte3.CTRnombre}" itemValue="#{catalogoreporte3.CTRnombre}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>                                                       
+
+                            </p:panelGrid>
+
+                        </center> -->
+                    </p:panel>
+
+                    <p:tooltip id="toolTipBtnCONS" for="btnCON" value="Nueva consulta" />
+                    <!--<p:tooltip id="toolTipBtnGC" for="btnGC" value="Guardar consulta" />
+                    <p:tooltip id="toolTipBtnMC" for="btnMC" value="Modificar consulta guardada" />
+                    <p:tooltip id="toolTipBtnELC" for="btnELC" value="Eliminar consulta guardada" />
+                    <p:tooltip id="toolTipBtnEJC" for="btnEJC" value="Ejecutar consulta guardada" />
+                    --><p:tooltip id="toolTipBtnExl" for="btnExl" value="Exportar a Excel" />
+                    <!--<p:tooltip id="toolTipBtnExl2" for="btnExl2" value="Exportar a Excel Programas Educativos - Director" />-->
+                    <!-- <p:tooltip id="toolTipBtnSemaf" for="btnSemaf" value="Semáforo General" /> -->
+
+                    <!--************** Reporte nuevo a medida-->            
+                    <p:dialog id="consultas" widgetVar="comunes" header="Consultas" position="center center" style="margin-bottom:22%" 
+                              showEffect="clip" hideEffect="clip" modal="true" draggable="true" resizable="false" >  
+                        <!--
+                        <p:dialog id="consultas" widgetVar="comunes" header="Consultas" position="50,150"
+                                  showEffect="clip" hideEffect="clip" modal="true" resizable="false"  draggable="false" >  
+                        -->
+
+                        <p:row>
+                            <p:panelGrid>
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">RACT a Seleccionar: </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectOneMenu id="ract" value="#{filtrosBeanUI.ract}">  
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                            <f:selectItem itemLabel="1er RACT" itemValue="1"/>
+                                            <f:selectItem itemLabel="2do RACT" itemValue="2"/>
+                                            <f:selectItem itemLabel="3er RACT" itemValue="3"/> 
+                                            <f:selectItem itemLabel="Todos los RACT" itemValue="4"/> 
+                                            <p:ajax update=":forma:btnGenerarReporte" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">Tipo de reporte: </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectOneMenu id="reporte" value="#{filtrosBeanUI.reporte}" autoWidth="false" style="width:243px">  
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                            <f:selectItem itemLabel="Entregados" itemValue="entregados"/>
+                                            <f:selectItem itemLabel="No entregados" itemValue="noentregados"/>
+                                            <f:selectItem itemLabel="Entregados y no entregados" itemValue="entregadosynoentregados"/>    
+                                            <f:selectItem itemLabel="Porcentaje de avance global completo" itemValue="Porcentaje de Avance Global Completo"/>
+                                            <f:selectItem itemLabel="Porcentaje de avance global incompleto" itemValue="Porcentaje de Avance Global Incompleto"/>
+                                            <f:selectItem itemLabel="Porcentaje de avance global completo e incompleto" itemValue="Porcentaje de Avance Global Completo e Incompleto"/>
+                                            
+                                            <p:ajax update=":forma:btnGenerarReporte" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> 
+
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">Ciclo escolar:</p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <!--
+                                    <p:selectCheckboxMenu id="filtroCicloEs" value="#{filtrosBeanUI.selectCicloEscolar}" label="Seleccione ciclo escolar" filter="true" style="width: 590px">
+                                        <f:selectItems value="#{filtrosBeanUI.filtrosBeanHelper.ciclosEscolares}" var="ciclo" itemLabel="#{ciclo.CEScicloEscolar}" itemValue="#{ciclo.CEScicloEscolar}" />
+                                        <p:ajax update=":forma:btnGenerarReporte" />
+                                        <p:keyFilter regEx="/[0-9_\-\]"/>
+                                    </p:selectCheckboxMenu>
+                                        --> 
+
+                                        <p:selectOneMenu id="filtroCicloEs" value="#{filtrosBeanUI.idCicloEscolar}" label="Seleccione ciclo escolar" filter="true">
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                            <f:selectItems value="#{filtrosBeanUI.filtrosBeanHelper.ciclosEscolares}" var="ciclo" itemLabel="#{ciclo.CEScicloEscolar}" itemValue="#{ciclo.CESid}" />
+                                            <p:ajax  update=":forma:btnGenerarReporte" />
+                                            <p:keyFilter regEx="/[0-9_\-\]"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                    
+                                    <p:column colspan="1" style="width:154px">Criterio de búsqueda: </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        
+                                        <h:panelGroup id="criterios">
+                                            <p:selectOneMenu id="criterio" value="#{filtrosBeanUI.criterio}" rendered="#{filtrosBeanUI.habilitarCriterios}" onchange="showBtnCriterio(this.value);" valueChangeListener="#{filtrosBeanUI.limpiarFiltrosByCriterio()}" autoWidth="false" style="width:243px">  
+                                                <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                                <f:selectItem itemLabel="Programa educativo" itemValue="programa_educativo" />
+                                                <f:selectItem itemLabel="Área de conocimiento" itemValue="area_conocimiento"/>
+                                                <f:selectItem itemLabel="Área administrativa" itemValue="area_administrativa" />
+                                                <f:selectItem itemLabel="Unidad de aprendizaje" itemValue="unidad_aprendizaje" />
+                                                <f:selectItem itemLabel="Profesor" itemValue="profesor"  />
+                                                <p:ajax listener="#{filtrosBeanUI.refrescarVariables()}"  update=":forma:planesestudios_areaadministrativa :forma:proged2 :forma:proged3 :forma:proged4 :forma:proged5  :forma:planesestudios 
+                                                         :forma:unidad_aprendizaje_planesestudios  
+                                                        :forma:areasconimiento_form_area :forma:areasadministrativas_form_areaadmin :forma:unidad_aprendizaje_areas 
+                                                         :forma:unidad_aprendizaje_form   
+                                                          :forma:btnGenerarReporte :forma:unidadesacademicas :forma:programasporclave
+                                                        :forma:unidadesacademicas2 :forma:proged2 :forma:planesestudios :forma:areasconimiento_form_area :forma:unidadesacademicas5
+                                                        :forma:proged5  :forma:areasadministrativas_form_areaadmin :forma:unidadesacademicas3 :forma:unidadesacademicas4 :forma:profesor_profesor
+                                                        "/>
+                                            </p:selectOneMenu>
+                                            
+                                           <!-- Para coordinador de area nada mas para que no miestre todos los filtros-->
+                                            <p:selectOneMenu id="criterioCoordinador" value="#{filtrosBeanUI.criterio}" rendered="#{!filtrosBeanUI.habilitarCriterios}" autoWidth="false" onchange="showBtnCriterio(this.value);" valueChangeListener="#{filtrosBeanUI.limpiarFiltrosByCriterio()}" style="width: 550px">  
+                                                <f:selectItem itemLabel="Seleccione uno" itemValue=""/>                                                
+                                                <f:selectItem itemLabel="Área administrativa" itemValue="area_administrativa" />
+                                                <f:selectItem itemLabel="Unidad de aprendizaje" itemValue="unidad_aprendizaje" />
+                                                <f:selectItem itemLabel="Profesor" itemValue="profesor"  />
+                                                <p:ajax listener="#{filtrosBeanUI.refrescarVariables()}"  update=":forma:planesestudios_areaadministrativa :forma:proged2 :forma:proged3 :forma:proged4 :forma:proged5  :forma:planesestudios 
+                                                         :forma:unidad_aprendizaje_planesestudios  
+                                                        :forma:areasconimiento_form_area :forma:areasadministrativas_form_areaadmin :forma:unidad_aprendizaje_areas 
+                                                         :forma:unidad_aprendizaje_form   
+                                                          :forma:btnGenerarReporte :forma:unidadesacademicas :forma:programasporclave
+                                                        :forma:unidadesacademicas2 :forma:proged2 :forma:planesestudios :forma:areasconimiento_form_area :forma:unidadesacademicas5
+                                                        :forma:proged5  :forma:areasadministrativas_form_areaadmin :forma:unidadesacademicas3 :forma:unidadesacademicas4 :forma:profesor_profesor
+                                                        "/>
+                                            </p:selectOneMenu>
+                                        </h:panelGroup>
+                                    </p:column>
+                                </p:row>
+
+                            </p:panelGrid>
+                            <!--paneles con la informacion segun opcion seleccionada en Criterio de busqueda-->
+                            <p:panelGrid style="display:none;" id="formulario_programa_educativo" class="opcionesCriterio">
+                                <p:row>
+                                    <!-- seteamos datos iniciales para director de ingenieria-->
+                                    <p:column colspan="1" style="width:154px" ><h:outputText  value="Unidad académica:"/></p:column><p:column colspan="3">
+                                        <p:selectOneMenu id="unidadesacademicas" value="#{filtrosBeanUI.unidadAcademicaId}" autoWidth="false" style="width:621px">  
+
+                                            <f:selectItem itemLabel="FACULTAD DE INGENIERIA" itemValue="#{32}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesacademicas}" var="unidad" itemLabel="#{unidad.UACnombre}" itemValue="#{unidad.UACid}" />
+                                            <p:ajax update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte :forma:programasporclave"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>  
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Programa educativo:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">
+
+                                        <p:selectCheckboxMenu  id="programasporclave"   value="#{filtrosBeanUI.selectProgramaEducativoString}" label="Seleccione programa educativo" filter="true" style="width:650px; font-weight: 400;">                                                              
+                                            <p:ajax update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                            <p:ajax event="toggleSelect" update=":forma:btnGenerarReporte" />
+                                            
+                                            <f:selectItems value="#{filtrosBeanUI.filtroProgramasEducativos}" var="programa" itemLabel="#{programa.PEDnombre}" itemValue="#{programa.PEDnombre}" />                                
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>      
+                            </p:panelGrid>
+
+
+
+                            <p:panelGrid style="display:none;"   id="formulario_area_conocimiento" class="opcionesCriterio">
+                                <p:row>
+                                    <!-- seteamos datos iniciales para director de ingenieria-->
+                                    <p:column colspan="1" style="width:154px"><h:outputText value="Unidad académica:"/></p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectOneMenu id="unidadesacademicas2" value="#{filtrosBeanUI.unidadAcademicaId}" autoWidth="false" style="width:621px">  
+                                           <f:selectItem itemLabel="FACULTAD DE INGENIERIA" itemValue="#{32}" />
+                                            <!--<f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>-->
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesacademicas}" var="unidad2" itemLabel="#{unidad2.UACnombre}" itemValue="#{unidad2.UACid}" />
+                                            <p:ajax update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte :forma:proged2" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> 
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Programa educativo:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">                            
+                                        <p:selectOneMenu  id="proged2" value="#{filtrosBeanUI.programaEducativoId}" autoWidth="false" style="width:621px">
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.programasEducativos}" var="programa2" itemLabel="#{programa2.PEDnombre}" itemValue="#{programa2.PEDid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:planesestudios_areaadministrativa :forma:planesestudios :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor :forma:planesestudios :forma:unidad_aprendizaje_planesestudios  :forma:areasconimiento_form_area :forma:unidad_aprendizaje_areas  :forma:unidad_aprendizaje_form    " listener="#{filtrosBeanUI.guardarPrograma()}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Plan de estudio:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectCheckboxMenu id="planesestudios"  value="#{filtrosBeanUI.selectPlanesEstudioUniForm}" label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.planesEstudios}" var="plan" itemLabel="#{plan.PESvigenciaPlan}" itemValue="#{plan.PESid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:areasconimiento_form_area :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor" listener="#{filtrosBeanUI.guardarPlan()}"/>
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:areasconimiento_form_area :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor" />
+                                        </p:selectCheckboxMenu>
+                                    </p:column> 
+                                    
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Área de conocimiento:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectCheckboxMenu id="areasconimiento_form_area"  value="#{filtrosBeanUI.selectAreaConocimientoUniForm}"  label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.areasByPlanesEstudio}" var="area" itemLabel="#{area.ACOnombre}" itemValue="#{area.ACOid}"  />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor" listener="#{filtrosBeanUI.guardarAreaCon()}"/>
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor"/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+
+                            <p:panelGrid style="display:none;"   id="formulario_area_administrativa" class="opcionesCriterio">
+                                <p:row>
+                                    <!-- seteamos datos iniciales para director de ingenieria-->
+                                    <p:column colspan="1" style="width:154px"><h:outputText value="Unidad académica:"/></p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectOneMenu id="unidadesacademicas5" value="#{filtrosBeanUI.unidadAcademicaId}" style="width:621px">  
+                                            <f:selectItem itemLabel="FACULTAD DE INGENIERIA" itemValue="#{32}"/>
+                                            <!--<f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>-->
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesacademicas}" var="unidad5" itemLabel="#{unidad5.UACnombre}" itemValue="#{unidad5.UACid}" />
+                                            <p:ajax onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte :forma:proged5" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> 
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Programa educativo:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">                            
+                                        <p:selectOneMenu id="proged5" value="#{filtrosBeanUI.programaEducativoId}" style="width:621px">
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.programasEducativos}" var="programa5" itemLabel="#{programa5.PEDnombre}" itemValue="#{programa5.PEDid}" />
+                                            <p:ajax event="change" listener="#{filtrosBeanUI.guardarPrograma()}" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:planesestudios_areaadministrativa :forma:areasadministrativas_form_areaadmin :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor :forma:planesestudios :forma:unidad_aprendizaje_planesestudios  :forma:areasconimiento_form_area :forma:unidad_aprendizaje_areas  :forma:unidad_aprendizaje_form    "/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                
+                                
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Plan de estudio:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectCheckboxMenu id="planesestudios_areaadministrativa"  value="#{filtrosBeanUI.selectPlanesEstudioUniForm}" label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.planesEstudios}" var="plan" itemLabel="#{plan.PESvigenciaPlan}" itemValue="#{plan.PESid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:areasadministrativas_form_areaadmin :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor" listener="#{filtrosBeanUI.guardarPlan()}"/>
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:areasadministrativas_form_areaadmin :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_profesor" />
+                                        </p:selectCheckboxMenu>
+                                    </p:column> 
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Área administrativa:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectCheckboxMenu  id="areasadministrativas_form_areaadmin"  value="#{filtrosBeanUI.selectAreaAdminString}" label="Seleccione Área administrativa" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.areasAdministrativa}" var="areaadmin" itemLabel="#{areaadmin.AADnombre}" itemValue="#{areaadmin.AADid}" />
+                                            <p:ajax event="change" listener="#{filtrosBeanUI.guardarAreaAdmin()}" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:btnGenerarReporte "/>
+                                            <p:ajax event="toggleSelect" update=":forma:btnGenerarReporte " onstart="PF('status').show()" oncomplete="PF('status').hide()"/> 
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+
+
+                                </p:row>
+                            </p:panelGrid>
+
+                            <p:panelGrid style="display:none;"  id="formulario_unidad_aprendizaje" class="opcionesCriterio">
+                                <p:row>
+                                    <!-- seteamos datos iniciales para director de ingenieria-->
+                                    <p:column colspan="1" style="width:154px"><h:outputText value="Unidad académica:"/></p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectOneMenu id="unidadesacademicas3" autoWidth="false" value="#{filtrosBeanUI.unidadAcademicaId}" style="width:621px" >  
+                                            <f:selectItem itemLabel="FACULTAD DE INGENIERIA" itemValue="#{32}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesacademicas}" var="unidad3" itemLabel="#{unidad3.UACnombre}" itemValue="#{unidad3.UACid}" />
+                                            <p:ajax update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte :forma:proged3" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> 
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Programa educativo:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">                            
+                                        <p:selectOneMenu  autoWidth="false" id="proged3" value="#{filtrosBeanUI.programaEducativoId}" style="width:621px">
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.programasEducativos}" var="programa3" itemLabel="#{programa3.PEDnombre}" itemValue="#{programa3.PEDid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarPrograma()}" update=":forma:unidad_aprendizaje_planesestudios :forma:btnGenerarReporte  :forma:formulario_area_conocimiento :forma:formulario_profesor :forma:planesestudios :forma:unidad_aprendizaje_planesestudios  :forma:areasconimiento_form_area :forma:unidad_aprendizaje_areas  :forma:unidad_aprendizaje_form    "/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Plan de estudio:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectCheckboxMenu id="unidad_aprendizaje_planesestudios"  value="#{filtrosBeanUI.selectPlanesEstudioUniForm}" label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.planesEstudios}" var="plan" itemLabel="#{plan.PESvigenciaPlan}" itemValue="#{plan.PESid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarPlan()}" update=":forma:unidad_aprendizaje_areas :forma:btnGenerarReporte" />
+                                            <p:ajax event="toggleSelect"  onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:unidad_aprendizaje_areas :forma:btnGenerarReporte" />
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px" rendered="#{filtrosBeanUI.habilitarCriterios}">
+                                        <h:outputText value="Área de conocimiento:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px" rendered="#{filtrosBeanUI.habilitarCriterios}">
+                                        <p:selectCheckboxMenu id="unidad_aprendizaje_areas"  value="#{filtrosBeanUI.selectAreaConocimientoUniForm}" label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.areasByPlanesEstudio}" var="area" itemLabel="#{area.ACOnombre}" itemValue="#{area.ACOid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarAreaCon()}" update=":forma:unidad_aprendizaje_form :forma:btnGenerarReporte " />
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:unidad_aprendizaje_form :forma:btnGenerarReporte " />
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Unidad de aprendizaje:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectCheckboxMenu id="unidad_aprendizaje_form"  value="#{filtrosBeanUI.selectUnidadAprendizajeUniForm}" label="Seleccione uno" filter="true" style="width:650px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesByAreaUniForm}" var="unidad" itemLabel="#{unidad.UAPnombre}" itemValue="#{unidad.UAPid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarUnidad()}" update=" :forma:btnGenerarReporte" />
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=" :forma:btnGenerarReporte" />
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                
+                            </p:panelGrid>
+
+                            <p:panelGrid style="display:none;"  id="formulario_profesor" class="opcionesCriterio">
+                                <p:row>
+                                    <!-- seteamos datos iniciales para director de ingenieria-->
+                                    <p:column colspan="1" style="width:154px"><h:outputText value="Unidad académica:"/></p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectOneMenu id="unidadesacademicas4" autoWidth="false" value="#{filtrosBeanUI.unidadAcademicaId}" style="width:621px" >  
+                                            <f:selectItem itemLabel="FACULTAD DE INGENIERIA" itemValue="#{32}"/>
+                                            <!--<f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>-->
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesacademicas}" var="unidad4" itemLabel="#{unidad4.UACnombre}" itemValue="#{unidad4.UACid}" />
+                                            <p:ajax update=":forma:planesestudios_areaadministrativa :forma:btnGenerarReporte :forma:proged4" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> 
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Programa educativo:"/> 
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">                            
+                                        <p:selectOneMenu  id="proged4"  value="#{filtrosBeanUI.programaEducativoId}" autoWidth="false"  label="#{filtrosBeanUI.programaeducativo.PEDnombre}" style="width:621px">
+                                            <f:selectItem itemLabel="Seleccione uno" itemValue="#{0}"/>
+                                            <f:selectItems value="#{filtrosBeanUI.programasEducativos}" var="programa4" itemLabel="#{programa4.PEDnombre}" itemValue="#{programa4.PEDid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarPrograma()}" update=":forma:planesestudios_profesores :forma:btnGenerarReporte  :forma:formulario_area_conocimiento :forma:planesestudios :forma:unidad_aprendizaje_planesestudios  :forma:areasconimiento_form_area :forma:unidad_aprendizaje_areas  :forma:unidad_aprendizaje_form    :forma:profesor_profesor"/>
+
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                  <!--
+                                <p:row>
+                                    <p:column>
+                                        <h:outputText value="Plan de estudio:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:selectCheckboxMenu id="profesor_planesestudios"  value="#{filtrosBeanUI.selectPlanesEstudioUniForm}" label="Seleccione plan de estudios" filter="true" style="width: 590px">
+                                            <f:selectItems value="#{filtrosBeanUI.planesEstudios}" var="plan" itemLabel="#{plan.PESvigenciaPlan}" itemValue="#{plan.PESid}" />
+                                            <p:ajax event="change"  listener="#{filtrosBeanUI.guardarPlan()}" update=":forma:profesor_profesor :forma:btnGenerarReporte  "/>
+                                            <p:ajax event="toggleSelect" update=":forma:profesor_profesor :forma:btnGenerarReporte  "/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                  -->
+                                <p:row>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Plan de estudio:"/>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <p:selectCheckboxMenu id="planesestudios_profesores"  value="#{filtrosBeanUI.selectPlanesEstudioUniForm}" label="Seleccione uno" filter="true" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.planesEstudios}" var="plan" itemLabel="#{plan.PESvigenciaPlan}" itemValue="#{plan.PESid}" />
+                                            <p:ajax event="change" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:profesor_profesor :forma:btnGenerarReporte " listener="#{filtrosBeanUI.guardarPlan()}"/>
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:profesor_profesor :forma:btnGenerarReporte " />
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                    <p:column colspan="1" style="width:154px">
+                                        <h:outputText value="Profesor:"/>
+                                    </p:column>
+                                    <p:column colspan="3" style="width:154px">
+                                        <p:selectCheckboxMenu id="profesor_profesor"  value="#{filtrosBeanUI.selectProfesorString}" label="Seleccione Profesores" filter="true" filterMatchMode="contains" style="width:200px; font-weight: 400;">
+                                            <f:selectItems value="#{filtrosBeanUI.profesoresPorPlan}" var="profesor" itemLabel="#{profesor.PROnumeroEmpleado} - #{profesor.PROnombre} #{profesor.PROapellidoPaterno}" itemValue="#{profesor.PROid}" />
+                                            <p:ajax event="change"  onstart="PF('status').show()" oncomplete="PF('status').hide()" listener="#{filtrosBeanUI.guardarProfesor()}" update=":forma:btnGenerarReporte   "/>
+                                            <p:ajax event="toggleSelect" onstart="PF('status').show()" oncomplete="PF('status').hide()" update=":forma:btnGenerarReporte   "/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                  <!--
+                                <p:row>
+                                    <p:column >
+                                        <h:outputText value="Área de conocimiento:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:selectCheckboxMenu id="profesor_areas"   value="#{filtrosBeanUI.ac}" label="Seleccione Área de conocimiento" filter="true" style="width: 590px">
+                                            <f:selectItems value="#{filtrosBeanUI.areasByProfesor}" var="area" itemLabel="#{area.ACOnombre}" itemValue="#{area.ACOid}" />
+                                            <p:ajax event="change" listener="#{filtrosBeanUI.guardarAreaCon()}" update=" :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_area_conocimiento"/>
+                                            <p:ajax event="toggleSelect" update=" :forma:btnGenerarReporte :forma:formulario_unidad_aprendizaje :forma:formulario_area_conocimiento"/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                  
+                                <p:row>
+                                    <p:column>
+                                        <h:outputText value="Unidad de aprendizaje:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:selectCheckboxMenu id="profesor_profesorunidades"  value="#{filtrosBeanUI.selectGrupo}" label="Seleccione unidad de aprendizaje" filter="true" style="width: 590px"   >
+                                            <f:selectItems value="#{filtrosBeanUI.unidadesByAreaUniFormObj}" var="unidad" itemLabel="#{unidad.UAPnombre}" itemValue="#{unidad.UAPid}" />
+                                            <p:ajax event="change" listener="#{filtrosBeanUI.guardarUnidad()}" update=" :forma:btnGenerarReporte "/>
+                                            <p:ajax event="toggleSelect" update=" :forma:btnGenerarReporte "/>
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+                                </p:row>
+                                  -->
+
+                                  <!--
+                                <p:row>
+                                    <p:column>
+                                        <h:outputText value="Grupos:"/>
+                                    </p:column>
+                                    <p:column>
+                                        <p:selectCheckboxMenu id="profesor_grupos"  value="#{filtrosBeanUI.selectGrupoUniForm}" label="Seleccione Grupos" filter="true" style="width: 590px">
+                                            <f:selectItems value="#{filtrosBeanUI.gruposByUnidadAprendizajesObj}" var="grupo" itemLabel="#{grupo.GPOnumero}" itemValue="#{grupo.GPOnumero}" />
+                                            <p:ajax event="change" listener="#{filtrosBeanUI.guardarGrupo()}" update=":forma:btnGenerarReporte" />
+                                            <p:ajax event="toggleSelect" update=":forma:btnGenerarReporte "/>
+
+                                        </p:selectCheckboxMenu>
+                                    </p:column>
+
+                                </p:row>
+                                  -->
+                            </p:panelGrid>
+
+                            <!-- ejecusion de formulario y seleccion de grafica -->
+                            
+                                <!--
+                                <p:row>
+                                    <p:column><h:outputText value="Tipo de gráfica:"  style="width:200px" /></p:column>
+                                    <p:column>
+                                        <p:selectOneMenu id="tipoGrafico" value="#{filtrosBeanUI.tipoGrafico}"  onchange="showGraficos(this.value);" style="width:550px">
+                                            <f:selectItem itemLabel="Seleccione un tipo de gráfica" itemValue="nullo"/>
+                                            <f:selectItem itemLabel="Barras" itemValue="barras"/>
+                                            <f:selectItem itemLabel="Lineal o de puntos" itemValue="linea"/>                                                 
+                                            <f:selectItem itemLabel="Circular o pastel" itemValue="pastel"/>
+
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row> -->
+                                <!--<p:panelGrid>
+                                <p:row>
+                                    <p:column>
+                                    </p:column>
+                                    <p:column> 
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>-->
+                        </p:row>
+                        <p:commandButton style="margin-left: 35%" actionListener="#{filtrosBeanUI.enableBotonCancelar()}" value="Cancelar" onclick="this.hide();" update=":forma:btnGenerarReporte" />
+                        <p:commandButton actionListener="#{filtrosBeanUI.generarGrafico()}" onclick="this.hide()"  onstart="PF('status').show()" oncomplete="PF('status').hide()" disabled="#{filtrosBeanUI.habilitarBotonGenerarReporte()}" update="accordion:BarChart  accordion:table :formGuardar :formModificar accordion:tabView forma:accordion :formEliminar :formEjecutarQueryConsultaGuardada" id="btnGenerarReporte" value="Generar Reporte"   />                            
+
+                    </p:dialog>              
+                    <!-- 
+                    * Mostramos las graficas con 
+                        Título del gráfico
+                        Número de RACT
+                        Ciclo(s) Escolar(s)
+                        Programa(s) Educativo(s)
+                    -->
+                    
+                    <!--OSCAR-->
+                    <p:accordionPanel dynamic="true" cache="true" multiple="true" activeIndex="#{filtrosBeanUI.generarExl}" id="accordion">
+                        <p:tab title="Resumen de consulta">
+                            <p:panel widgetVar="Total  general de RACT  entregados" id="panel_tabla">
+                                <center><h:outputText value="#{filtrosBeanUI.tituloTabla}"/></center>
+                                <p:row>
+                                    <p:dataTable var="var" value="#{filtrosBeanUI.resumenesReporte}"  id="table" emptyMessage="Ningun registro encontrado." style="text-align: left;"> 
+                                        <p:column headerText="#{filtrosBeanUI.headerCriterio}">
+                                            <h:outputText value="#{var.nombreSegunCriterio}"/>
+                                        </p:column>
+
+                                        <p:column headerText="Plan de estudios" rendered="#{filtrosBeanUI.renderPlanResumen}"  style="width: 155px; text-align: center">
+                                            <h:outputText value="#{var.planEstudio}"  style="center"/>
+                                        </p:column>
+
+                                        <p:column headerText="#{filtrosBeanUI.headerEsperados}" rendered="#{filtrosBeanUI.renderTablaResumen}" style="width: 145px; text-align: center">
+                                            <h:outputText value="#{var.numEsperados}" style="center"/>
+                                        </p:column>
+                                        <p:column headerText="#{filtrosBeanUI.headerTipoReporte}" style="width: 175px;text-align: center">
+                                            <h:outputText value="#{var.numEntregados}" style="center"/>
+                                        </p:column>
+                                        <p:column headerText="#{filtrosBeanUI.headerPorcentaje}" style="width: 145px; text-align: center">
+                                            <h:outputText value="#{var.porcentaje}" style="center" />
+                                        </p:column>
+                                    </p:dataTable>  
+                                </p:row>
+                            </p:panel>
+                        </p:tab>
+                        
+                        <p:tab title="Gráfica de consulta">
+                            <p:panel widgetVar="panelBarras" id="panel_barras" rendered="#{filtrosBeanUI.mostrarBar}" style="align-items:center">
+                                <p:row>
+                                    <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                                    <p:chart type="bar" id="BarChart" widgetVar="barrasResultado"  model="#{filtrosBeanUI.barModel}"
+                                             style="width: 1000px;height: 500px; margin-left:14%;"   responsive="true"/>                
+                                </p:row>
+                            </p:panel>
+
+                            <p:panel widgetVar="panelPie" id="panel_Pie" rendered="#{filtrosBeanUI.mostrarPie}" style="align-items:center">
+                                <p:row>
+                                    <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                                    <p:chart type="pie" id="PieChart" widgetVar="pieResultado"  model="#{filtrosBeanUI.pieModel}"
+                                                style="width: 1000px;height: 500px;"  />                
+                                </p:row>
+                            </p:panel>
+
+                            <p:panel widgetVar="panelLineas" id="panel_lineas" rendered="#{filtrosBeanUI.mostrarLine}" style="align-items:center">
+                                <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                                <p:chart type="bar" id="LineChart" widgetVar="lineaResultado" model=""
+                                             style="width: 1000px;height: 500px;"/> 
+
+                            </p:panel>
+                        </p:tab>
+                        
+                        <p:tab title="Detalle de consulta">
+                            <p:tabView id = "tabView" value="#{filtrosBeanUI.tabs}" rendered="#{filtrosBeanUI.mostrarBar}"  scrollable="true" var ="tab">
+                                <p:tab title = "#{tab.title}"> 
+                                    <p:dataTable  id="tablaDetalle" var = "reporte" value="#{tab.detallesReporte}"
+                                                  scrollable="false" scrollHeight="300" scrollWidth="1300" emptyMessage="No se encontraron registros que cumplan con los criterios de busqueda" >
+
+                                        <p:column headerText="Clave UA" width="8%">
+                                            <h:outputText value ="#{reporte.claveUnidadAprendizaje}"/>
+                                        </p:column>
+
+                                        <p:column headerText="Unidad de Aprendizaje" width="30%" filterBy="#{reporte.nombreUnidadAprendizaje}" filterMatchMode="contains">
+                                            <h:outputText value ="#{reporte.nombreUnidadAprendizaje} "/>
+                                        </p:column>
+                                        <p:column headerText="No.Empleado" width = "10%">
+                                            <h:outputText value ="#{reporte.numeroEmpleado}" />
+                                        </p:column>
+                                        <p:column headerText="Profesor" width="20%"  filterBy="#{reporte.nombreProfesor}" filterMatchMode="contains">
+                                            <h:outputText value ="#{reporte.nombreProfesor}" />
+                                        </p:column>
+
+                                        <p:column headerText="Grupo" width = "12%">
+                                            <h:outputText value ="#{reporte.grupo}"/>
+                                        </p:column>
+
+                                        <p:column headerText="% RACT #1 " width="10%" rendered="#{filtrosBeanUI.renderDR1}">
+                                            <h:outputText value ="#{reporte.porcentajeRact1}%"/>
+                                        </p:column>
+                                        <p:column headerText="Fecha RACT #1" width="12%" rendered="#{filtrosBeanUI.renderDR1}">
+                                            <h:outputText value ="#{reporte.fechaRact1}"/>
+                                        </p:column>
+                                        <p:column headerText="% RACT #2 " width="10%" rendered="#{filtrosBeanUI.renderDR2}">
+                                            <h:outputText value ="#{reporte.porcentajeRact2}%"/>
+                                        </p:column>
+                                        <p:column headerText="Fecha RACT #2" width="12%" rendered="#{filtrosBeanUI.renderDR2}">
+                                            <h:outputText value ="#{reporte.fechaRact2}"/>
+                                        </p:column>
+                                        <p:column headerText="% RACT #3 " width="10%" rendered="#{filtrosBeanUI.renderDR3}">
+                                            <h:outputText value ="#{reporte.porcentajeRact3}%"/>
+                                        </p:column>
+                                        <p:column headerText="Fecha RACT #3" width="12%" rendered="#{filtrosBeanUI.renderDR3}">
+                                            <h:outputText value ="#{reporte.fechaRact3}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:tab>
+                        </p:tabView>
+
+                        </p:tab>
+                    </p:accordionPanel>
+                    
+                    <!--OSCAR
+                    Estos componenetes estan comentados porque se colocaron en un accordion, que es el que esta arriba
+                    En cuanto se le realicen pruebas y se compruebe el correcto funcionamiento del accordion, hay que 
+                    borrar todo este bloque de codigo comentado.
+                    
+                    <h:outputText value="Resumen de consulta"/>
+                    <p:panel widgetVar="Total  general de RACT  entregados" id="panel_tabla">
+                        <center><h:outputText value="#{filtrosBeanUI.tituloTabla}"/></center>
+                        <p:row>
+                            <p:dataTable var="var" value="#{filtrosBeanUI.resumenesReporte}"  id="table" emptyMessage="Ningun registro encontrado." style="text-align: left;"> 
+                                <p:column headerText="#{filtrosBeanUI.headerCriterio}">
+                                    <h:outputText value="#{var.nombreSegunCriterio}"/>
+                                </p:column>
+                              
+                                <p:column headerText="Plan de estudios" rendered="#{filtrosBeanUI.renderPlanResumen}"  style="width: 155px; text-align: center">
+                                    <h:outputText value="#{var.planEstudio}"  style="center"/>
+                                </p:column>
+                                
+                                <p:column headerText="Esperados" rendered="#{filtrosBeanUI.renderTablaResumen}" style="width: 145px; text-align: center">
+                                    <h:outputText value="#{var.numEsperados}" style="center"/>
+                                </p:column>
+                                <p:column headerText="#{filtrosBeanUI.headerTipoReporte}" style="width: 175px;text-align: center">
+                                    <h:outputText value="#{var.numEntregados}" style="center"/>
+                                </p:column>
+                                <p:column headerText="#{filtrosBeanUI.headerPorcentaje}" style="width: 145px; text-align: center">
+                                    <h:outputText value="#{var.porcentaje}" style="center" />
+                                </p:column>
+                            </p:dataTable>  
+                        </p:row>
+                    </p:panel> 
+                    
+                    <h:outputText value="Gráfica de consulta" rendered="#{filtrosBeanUI.mostrarBar}" />
+                        <p:panel widgetVar="panelBarras" id="panel_barras" rendered="#{filtrosBeanUI.mostrarBar}" style="align-items:center">
+                            <p:row>
+                                <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                                <p:chart type="bar" id="BarChart" widgetVar="barrasResultado"  model="#{filtrosBeanUI.barModel}"
+                                         style="width: 1000px;height: 500px; margin-left:14%;"   responsive="true"/>                
+                            </p:row>
+                        </p:panel>
+
+                        <p:panel widgetVar="panelPie" id="panel_Pie" rendered="#{filtrosBeanUI.mostrarPie}" style="align-items:center">
+                            <p:row>
+                                <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                                <p:chart type="pie" id="PieChart" widgetVar="pieResultado"  model="#{filtrosBeanUI.pieModel}"
+                                            style="width: 1000px;height: 500px;"  />                
+                            </p:row>
+                        </p:panel>
+
+                        <p:panel widgetVar="panelLineas" id="panel_lineas" rendered="#{filtrosBeanUI.mostrarLine}" style="align-items:center">
+                            <h:outputText value="#{filtrosBeanUI.tituloGraficas}"/>
+                            <p:chart type="bar" id="LineChart" widgetVar="lineaResultado" model=""
+                                         style="width: 1000px;height: 500px;"/> 
+
+                        </p:panel>
+                    
+                    
+                    <h:outputText value="Detalle de consulta" rendered="#{filtrosBeanUI.mostrarBar}" />
+                    <p:tabView id = "tabView" value="#{filtrosBeanUI.tabs}" rendered="#{filtrosBeanUI.mostrarBar}"  scrollable="true" var ="tab">
+                            <p:tab title = "#{tab.title}"> 
+                                <p:dataTable  id="tablaDetalle" var = "reporte" value="#{tab.detallesReporte}"
+                                              scrollable="true" scrollHeight="300" scrollWidth="1300" emptyMessage="No se encontraron registros que cumplan con los criterios de busqueda" >
+                                    
+                                    <p:column headerText="Clave UA" width="8%">
+                                        <h:outputText value ="#{reporte.claveUnidadAprendizaje}"/>
+                                    </p:column>
+                                    
+                                    <p:column headerText="Unidad de Aprendizaje" width="30%" filterBy="#{reporte.nombreUnidadAprendizaje}" filterMatchMode="contains">
+                                        <h:outputText value ="#{reporte.nombreUnidadAprendizaje} "/>
+                                    </p:column>
+                                    <p:column headerText="No.Empleado" width = "10%">
+                                        <h:outputText value ="#{reporte.numeroEmpleado}" />
+                                    </p:column>
+                                    <p:column headerText="Profesor" width="20%"  filterBy="#{reporte.nombreProfesor}" filterMatchMode="contains">
+                                        <h:outputText value ="#{reporte.nombreProfesor}" />
+                                    </p:column>
+                                    
+                                    <p:column headerText="Grupo" width = "12%">
+                                        <h:outputText value ="#{reporte.grupo}"/>
+                                    </p:column>
+                                    
+                                    <p:column headerText="% RACT #1 " width="10%" rendered="#{filtrosBeanUI.renderDR1}">
+                                        <h:outputText value ="#{reporte.porcentajeRact1}%"/>
+                                    </p:column>
+                                    <p:column headerText="Fecha RACT #1" width="12%" rendered="#{filtrosBeanUI.renderDR1}">
+                                        <h:outputText value ="#{reporte.fechaRact1}"/>
+                                    </p:column>
+                                    <p:column headerText="% RACT #2 " width="10%" rendered="#{filtrosBeanUI.renderDR2}">
+                                        <h:outputText value ="#{reporte.porcentajeRact2}%"/>
+                                    </p:column>
+                                    <p:column headerText="Fecha RACT #2" width="12%" rendered="#{filtrosBeanUI.renderDR2}">
+                                        <h:outputText value ="#{reporte.fechaRact2}"/>
+                                    </p:column>
+                                    <p:column headerText="% RACT #3 " width="10%" rendered="#{filtrosBeanUI.renderDR3}">
+                                        <h:outputText value ="#{reporte.porcentajeRact3}%"/>
+                                    </p:column>
+                                    <p:column headerText="Fecha RACT #3" width="12%" rendered="#{filtrosBeanUI.renderDR3}">
+                                        <h:outputText value ="#{reporte.fechaRact3}"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </p:tab>
+                    </p:tabView> -->
+                   
+
+                </h:form>
+
+
+                <p:dialog id="guardarReporte" widgetVar="guardarReport" header="Guardar reporte consulta" 
+                          showEffect="clip" hideEffect="clip" modal="true" resizable="false" style="width: 100%" >  
+                    <h:form id="formGuardar"> 
+
+                        <p:panelGrid columns="2" >
+
+                            <p:outputLabel value="Nombre de la consulta a guardar:" />
+                            <p:inputText value="#{filtrosBeanUI.CTRnombre}" widgetVar="ctrnombre" />                                
+
+
+                        </p:panelGrid>
+                        <p:commandButton value="Cancelar" onclick="this.hide();" />
+                        <p:commandButton action="#{filtrosBeanUI.guardarConsulta()}" value="Guardar consulta" onclick="this.hide();" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada :forma:growl"/>
+                    </h:form> 
+                </p:dialog>    
+
+
+
+                <p:dialog id="modificarReporte" widgetVar="modificarReport" header="Modificar reporte consulta" 
+                          showEffect="clip" hideEffect="clip" modal="true" resizable="false" style="width: 100%" >  
+                    <h:form id="formModificar"> 
+                        <p:panelGrid columns="2" >                
+
+                            <p:row>
+                                <!-- seteamos datos iniciales para director de ingenieria-->
+                                <p:column><h:outputText value="Nombre de la consulta guardada:"/></p:column></p:row><p:row><p:column>
+                                    <p:selectOneMenu id="catalogoreportes"  value="#{filtrosBeanUI.CTRnombre}">  
+                                        <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                        <f:selectItems value="#{filtrosBeanUI.listaCatalogoReportes}" var="catalogoreporte" itemLabel="#{catalogoreporte.CTRnombre}" itemValue="#{catalogoreporte.CTRnombre}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>  
+
+                        </p:panelGrid>
+                        <p:commandButton value="Cancelar" onclick="this.hide();" />
+                        <p:commandButton action="#{filtrosBeanUI.modificarConsulta()}" value="Modificar consulta" onclick="this.hide();" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada :forma:growl"/>
+                    </h:form>
+                </p:dialog>
+
+
+
+                <p:dialog id="eliminarReporte" widgetVar="eliminarReport" header="Eliminar reporte consulta" 
+                          showEffect="clip" hideEffect="clip" modal="true" resizable="false" style="width: 100%" >  
+                    <h:form id="formEliminar"> 
+                        <p:panelGrid columns="2" >                
+
+                            <p:row>
+                                <!-- seteamos datos iniciales para director de ingenieria-->
+                                <p:column><h:outputText value="Nombre de la consulta guardada:"/></p:column></p:row><p:row><p:column>
+                                    <p:selectOneMenu id="catalogoreportes1"  value="#{filtrosBeanUI.CTRnombre}">  
+                                        <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                        <f:selectItems value="#{filtrosBeanUI.listaCatalogoReportes}" var="catalogoreporte1" itemLabel="#{catalogoreporte1.CTRnombre}" itemValue="#{catalogoreporte1.CTRnombre}"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>  
+
+                        </p:panelGrid>
+                        <p:commandButton value="Cancelar" onclick="this.hide();" />
+                        <p:commandButton action="#{filtrosBeanUI.eliminarConsulta()}" value="Eliminar consulta" onclick="this.hide();" update=":formGuardar :formModificar :formEliminar :formEjecutarQueryConsultaGuardada :forma:growl"/>
+                    </h:form>  
+                </p:dialog>
+
+
+
+
+                <p:dialog id="ejecutarReporteGuardado" widgetVar="ejecutarReportGuardado" header="Ejecutar reporte consulta" 
+                          showEffect="clip" hideEffect="clip" modal="true" resizable="false" style="width: 100%" >  
+                    <h:form id="formEjecutarQueryConsultaGuardada"> 
+                        <p:panelGrid columns="2" >
+
+                            <p:row>                    
+                                <p:column><h:outputText value="Nombre de la consulta guardada:"/></p:column></p:row><p:row><p:column>
+                                    <p:selectOneMenu id="catalogoreportes2"  value="#{filtrosBeanUI.CTRnombre}">                                     
+                                        <f:selectItem itemLabel="Seleccione uno" itemValue=""/>
+                                        <f:selectItems value="#{filtrosBeanUI.listaCatalogoReportes}" var="catalogoreporte2" itemLabel="#{catalogoreporte2.CTRnombre}" itemValue="#{catalogoreporte2.CTRnombre}"/>
+                                        <p:ajax update="formAceptar"></p:ajax>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                        </p:panelGrid>
+                        <p:commandButton value="Cancelar" onclick="this.hide();" />
+                        <p:commandButton id="formAceptar" action="#{filtrosBeanUI.ejecutarQueryConsultaGuardada()}" disabled="#{!filtrosBeanUI.disableBtnEjecutarGrafico}" value="Ejecutar consulta" onclick="this.hide();" update=":forma:growl :forma:accordion:BarChart  :formGuardar :formModificar :formEliminar " ></p:commandButton>
+                    </h:form>
+                </p:dialog>
+
+                <p:dialog id="ejecutarReporteGeneral" widgetVar="ejecutarReporteGeneral" header="Ejecutar reporte general" showEffect="clip" hideEffect="clip" modal="true" resizable="false" style="width: 100%">
+                    <h:form id="formEjecutarReporteGeneral">
+                        <p:panelGrid columns="2" >
+                            <p:row>
+                                <p:column>
+                                    <h:outputText value="Numero de RACT:"></h:outputText>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <p:selectOneMenu id="ract" value="#{filtrosBeanUI.ractSeleccionado3}" style="width: 550px">  
+                                        <f:selectItem itemLabel="Selecciona uno" itemValue=""/>
+                                        <f:selectItem itemLabel="1er RACT" itemValue="1"/>
+                                        <f:selectItem itemLabel="2do RACT" itemValue="2"/>
+                                        <f:selectItem itemLabel="3er RACT" itemValue="3"/> 
+                                        <f:selectItem itemLabel="Todos los RACT" itemValue="4"/> 
+                                        <p:ajax update=":formEjecutarReporteGeneral:btnAceptar" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+                        <p:commandButton value="Cancelar" onclick="this.hide();"/>
+                        <p:commandButton value="Exportar reporte" id="btnAceptar" actionListener="#{filtrosBeanUI.Export2ExcelSemaforoProgramasEd()}" onclick="PF('ejecutarReporteGeneral').hide()" disabled="#{!filtrosBeanUI.habilitarBtnReporteGrl}"/>
+                    </h:form>
+                </p:dialog>
+
+
+                <center>
+                    <p:dialog widgetVar="status" modal="true" draggable="false"
+                                    closable="false" resizable="false" showHeader="false"
+                                    style="width: 50px;height: 50px;background: none;border: none; box-shadow: none">
+                              <p:graphicImage name="imagenes/gif-load.gif" />
+                          </p:dialog>
+                    
+                    <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                        para volver a Siract.</h1></center>
+                    </h:form>
+                    
+                </center>
+            </h:body>
+        </f:view>
+    </ui:define>
+
+</ui:composition>

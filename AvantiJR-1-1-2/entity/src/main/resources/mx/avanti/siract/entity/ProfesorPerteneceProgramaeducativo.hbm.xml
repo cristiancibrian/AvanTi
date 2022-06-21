@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 17/03/2016 10:10:18 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="mx.avanti.siract.entity.ProfesorPerteneceProgramaeducativo" table="profesor_pertenece_programaeducativo" catalog="siract" optimistic-lock="version">
+        <composite-id name="id" class="mx.avanti.siract.entity.ProfesorPerteneceProgramaeducativoId">
+            <key-property name="profesorProid" type="int">
+                <column name="Profesor_PROid" />
+            </key-property>
+            <key-property name="programaEducativoPedid" type="int">
+                <column name="ProgramaEducativo_PEDid" />
+            </key-property>
+            <key-property name="cicloEscolarCesid" type="int">
+                <column name="CicloEscolar_CESid" />
+            </key-property>
+        </composite-id>
+        <many-to-one name="cicloescolar" class="mx.avanti.siract.entity.Cicloescolar" update="false" insert="false" fetch="select">
+            <column name="CicloEscolar_CESid" not-null="true" />
+        </many-to-one>
+        <many-to-one name="profesor" class="mx.avanti.siract.entity.Profesor" update="false" insert="false" fetch="select">
+            <column name="Profesor_PROid" not-null="true" />
+        </many-to-one>
+        <many-to-one name="programaeducativo" class="mx.avanti.siract.entity.Programaeducativo" update="false" insert="false" fetch="select">
+            <column name="ProgramaEducativo_PEDid" not-null="true" />
+        </many-to-one>
+    </class>
+</hibernate-mapping>

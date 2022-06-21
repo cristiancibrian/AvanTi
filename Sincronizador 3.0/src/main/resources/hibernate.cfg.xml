@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.characterEncoding">utf8</property>
+        <property name="hibernate.connection.CharSet">utf8</property>
+        <property name="hibernate.connection.isolation">2</property>
+        <property name="hibernate.connection.useUnicode">true</property>
+        <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider
+        </property>
+        <property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.enable_lazy_load_no_trans">true</property>
+        <property name="hibernate.allow_update_outside_transaction">true</property>
+        <property name="hibernate.hikari.minimumIdle">10</property>
+        <property name="hibernate.hikari.maximumPoolSize">10</property>
+        <property name="hibernate.hikari.idleTimeout">30000</property>
+        <property name="hibernate.hikari.dataSourceClassName">com.mysql.jdbc.jdbc2.optional.MysqlDataSource</property>
+        <property name="hibernate.hikari.dataSource.url">
+            jdbc:mysql://localhost:3306/siract?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true
+        </property>
+        <property name="hibernate.hikari.dataSource.user">root</property>
+        <property name="hibernate.hikari.dataSource.password">939773</property>
+        
+        <mapping class="entidades.Alumno"/>
+        <mapping class="entidades.AlumnoPerteneceGrupo"/>
+        <mapping class="entidades.Alerta"/>
+        <mapping class="entidades.Areaadministrativa"/>
+        <mapping class="entidades.Areaconocimiento"/>
+        <mapping class="entidades.Calendarioreporte"/>
+        <mapping class="entidades.CalendarioreporteTieneAlerta"/>
+        <mapping class="entidades.Campus"/>
+        <mapping class="entidades.Catalogoreportes"/>
+        <mapping class="entidades.Cicloescolar"/>
+        <mapping class="entidades.Configuracion"/>
+        <mapping class="entidades.Grupo"/>
+        <mapping class="entidades.Mensaje"/>
+        <mapping class="entidades.Permiso"/>
+        <mapping class="entidades.Planestudio"/>
+        <mapping class="entidades.Practicalaboratorio"/>
+        <mapping class="entidades.Practicascampo"/>
+        <mapping class="entidades.Practicasclinica"/>
+        <mapping class="entidades.Practicataller"/>
+        <mapping class="entidades.ProfesorPerteneceProgramaeducativo"/>
+        <mapping class="entidades.Programaeducativo"/>
+        <mapping class="entidades.Reporte"/>
+        <mapping class="entidades.Reporteavancecontenidotematico"/>
+        <mapping class="entidades.Rol"/>
+        <mapping class="entidades.RolHasPermiso"/>
+        <mapping class="entidades.Subtemaunidad"/>
+        <mapping class="entidades.Temaunidad"/>
+        <mapping class="entidades.Profesor"/>
+        <mapping class="entidades.Unidad"/>
+        <mapping class="entidades.Unidadacademica"/>
+        <mapping class="entidades.Unidadacademicatipo"/>
+        <mapping class="entidades.Unidadaprendizaje"/>
+        <mapping class="entidades.UnidadaprendizajeImparteProfesor"/>
+        <mapping class="entidades.Usuario"/>
+        <mapping class="entidades.UnidadaprendizajeTieneContenidotematico"/>
+        <mapping class="entidades.Subpermisos"/>
+        <mapping class="entidades.Coordinadorareaadministrativa"/>
+    </session-factory>
+</hibernate-configuration>

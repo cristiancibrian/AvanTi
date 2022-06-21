@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 17/03/2016 10:10:18 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="mx.avanti.siract.entity.Unidad" table="unidad" catalog="siract" optimistic-lock="version">
+        <id name="uniid" type="java.lang.Integer">
+            <column name="UNIid" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="unidadaprendizaje" class="mx.avanti.siract.entity.Unidadaprendizaje" fetch="select">
+            <column name="UnidadAprendizaje_UAPid" not-null="true" />
+        </many-to-one>
+        <property name="uninumero" type="java.lang.Integer">
+            <column name="UNInumero" />
+        </property>
+        <property name="uninombre" type="string">
+            <column name="UNInombre" length="150" />
+        </property>
+        <property name="univalorPorcentaje" type="float">
+            <column name="UNIvalorPorcentaje" precision="12" scale="0" not-null="true" />
+        </property>
+        <property name="unihoras" type="float">
+            <column name="UNIhoras" precision="12" scale="0" not-null="true" />
+        </property>
+        <property name="unihorasCompletas" type="java.lang.Boolean">
+            <column name="UNIhorasCompletas" />
+        </property>
+        <set name="temaunidads" table="temaunidad" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="Unidad_UNIid" not-null="true" />
+            </key>
+            <one-to-many class="mx.avanti.siract.entity.Temaunidad" />
+        </set>
+    </class>
+</hibernate-mapping>

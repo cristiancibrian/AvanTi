@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml" > 
+    <ui:define name="contenido">
+        <f:view contentType="text/html">  
+
+            <h:head>
+                <!--Script para poder anidar tablas expandibles -->
+                <script type="text/javascript">
+                    var siteFunctions = {
+                        //patch to fix a problem that the context menu disappears after update
+                        //delay the show to occure after the update 
+                        patchContextMenuShow: function () {
+                            'use strict';
+                            var protShow = PrimeFaces.widget.ContextMenu.prototype.show;
+                            siteFunctions.patchContextMenuShow.lastEvent = null;
+                            PrimeFaces.widget.ContextMenu.prototype.show = function (e) {
+                                var ret;
+                                if (e) {
+
+                                    //                console.log('saving last event');
+
+                                    siteFunctions.patchContextMenuShow.lastEvent = e;
+                                    siteFunctions.patchContextMenuShow.lastEventArg = arguments;
+                                    siteFunctions.patchContextMenuShow.lastEventContext = this;
+                                } else if (siteFunctions.patchContextMenuShow.lastEvent) {
+
+                                    //                console.log('executing last event');
+
+                                    ret = protShow.apply(siteFunctions.patchContextMenuShow.lastEventContext, siteFunctions.patchContextMenuShow.lastEventArg);
+
+                                    //                console.log('clearing last event');
+                                    siteFunctions.patchContextMenuShow.lastEvent = null;
+                                }
+                                return ret;
+                            };
+                        }
+                    };
+
+                    $(document).ready(function () {
+                        'use strict';
+                        try {
+                            siteFunctions.patchContextMenuShow();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+
+                    function sincronizar(valor) {
+                        document.getElementById("formId:observacion").value = valor;
+                    }
+
+                    //Funcion utilizada para actualizar etiqueta porcentaje desde el BackBean
+                    function avance(porcentaje) {
+                        document.getElementById("formId:actualizarAvance").click();
+                    }
+
+                    function pop() {
+                    }
+
+
+                    function obtenerArchivoActual() {
+
+                    }
+
+                </script>
+
+                <f:facet  name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Unidad academica</title> 
+                </f:facet>
+            </h:head>
+            <h:body >
+                <h:outputStylesheet name="Style.css" library="css"/>
+                <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces" />
+                <center>
+
+                    <!-- <h:form id="formId" styleClass="formulario" style="width: 80%; margin-right:13%" rendered="#{loginBean.tienePermiso}"> -->
+                    <h:form id="formId" styleClass="formulario" style="width: 80%; margin-right:13%" rendered="#{loginBean.permisoGeneral(consultarPoliticasBeanUI.IDCATALOGOCONSULTAPOLITICA)}">                        
+                        <p:commandButton style="display: none;visibility: hidden" value="" id="actualizarAvance" />
+                        <p:growl id="growl" showDetail="true" life="5000" />
+
+                        <p:fieldset legend="Consulta políticas de evaluación" styleClass="myFieldset" style="width: 100%; ">
+
+
+                            <p:outputPanel>
+                                <div>
+                                    <p:panelGrid styleClass="mypanelgrid" columnClasses="centered"  >
+                                        <p:row> 
+                                            <p:column styleClass="superior" colspan="1">
+                                                <span><b>Ciclo escolar: </b></span> 
+                                                <p:selectOneMenu id="selectCicloEscolar"  
+                                                                 value="#{consultarPoliticasBeanUI.cicloEscolarSeleccionado}" 					 
+                                                                 style="width: 150px" 
+                                                                 autoWidth="false"
+                                                                 >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="Seleccione CE"/>
+
+                                                    <f:selectItems value="#{consultarPoliticasBeanUI.listaCiclosEscolares}" 
+                                                                   var="CE"
+                                                                   itemValue="#{CE.CESid}"
+                                                                   itemLabel="#{CE.CEScicloEscolar}"/>
+                                                    <p:ajax
+                                                        update=":formId:selectProgramaEducativo :formId:profesores :formId:imprimir :formId:UnidadesAprendisaje   "
+                                                        listener="#{consultarPoliticasBeanUI.onSelectCE()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            
+                                            
+                                            
+                                            
+                                            <p:column colspan="2" styleClass="esquina" visible="false">
+                                                <p:outputLabel rendered ="#{consultarPoliticasBeanUI.esAlumno2()}">Programa educativo:<br></br> </p:outputLabel>
+                                                
+                                                <p:outputLabel rendered ="#{consultarPoliticasBeanUI.esAlumno()}" id="nompe" 
+                                                               value="#{consultarPoliticasBeanUI.PEAlumno()}">
+                                                </p:outputLabel>
+                                                
+                                                <p:selectOneMenu id="selectProgramaEducativo"  
+                                                                 value="#{consultarPoliticasBeanUI.programaEducativoSeleccionado}" 
+                                                                 style="width: 450px" 
+                                                                 autoWidth="false"
+                                                                 rendered ="#{!consultarPoliticasBeanUI.esAlumno()}"
+                                                                 >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción  --"/>
+
+                                                    <f:selectItems value="#{consultarPoliticasBeanUI.programasEducativosConsultas}" 
+                                                                   var="programa"
+                                                                   itemValue="#{programa.PEDid}"
+                                                                   itemLabel="#{programa.PEDnombre}"
+                                                                   /> 
+
+                                                    <p:ajax event="valueChange" 
+                                                            update=":formId:UnidadesAprendisaje :formId:profesores :formId:selectCicloEscolar :formId:imprimir   "
+                                                            listener="#{consultarPoliticasBeanUI.onSelectPE()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                                            />
+                                                    />
+
+                                                </p:selectOneMenu>
+                                            </p:column>
+
+                                            
+
+
+
+                                           
+
+                                        </p:row>
+                                        <p:row >
+                                            <p:column colspan="1">
+                                                <span><b>#{consultarPoliticasBeanUI.rolLogin()}</b></span>
+                                                <br></br>
+                                                <p:outputLabel rendered ="#{consultarPoliticasBeanUI.esProfesoroAlumno()}" id="nomEmp" 
+                                                               value="#{consultarPoliticasBeanUI.nombreCompletoProfesor}">
+                                                </p:outputLabel>
+
+
+                                                <p:selectOneMenu id ="profesores" rendered = "#{!consultarPoliticasBeanUI.esProfesoroAlumno()}"
+                                                                 value ="#{consultarPoliticasBeanUI.profesorSeleccionado}"
+                                                                 style ="width: 420px;" filter="true" filterMatchMode="contains"
+                                                                 autoWidth="false"
+                                                                 >
+
+                                                    <f:selectItem itemLabel ="-- Seleccione un profesor --" itemValue ="0" />
+                                                    <f:selectItems value ="#{consultarPoliticasBeanUI.profesores}" var = "profe" itemValue ="#{profe.PROid}"/>
+                                                    <p:ajax event ="valueChange"  
+                                                            update=":formId:UnidadesAprendisaje :formId:selectProgramaEducativo  :formId:imprimir   "
+                                                            listener = "#{consultarPoliticasBeanUI.onSelectPROFESOR()}"  onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column  colspan="2">
+                                                <span><b>Unidad de aprendizaje: </b> <br></br> </span>                                               
+                                                <p:selectOneMenu  id="UnidadesAprendisaje" 
+                                                                  value="#{consultarPoliticasBeanUI.idUaipSeleccionada}" 
+                                                                  style="width: 500px"
+                                                                  filter="true"
+                                                                  filterMatchMode="contains" autoWidth="false"
+                                                                  rendered="#{!consultarPoliticasBeanUI.esAlumno()}"
+                                                                  >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción-- " /> 
+                                                    <f:selectItems id="selectUA" 
+                                                                   value="#{consultarPoliticasBeanUI.unidadesProfesor}" 
+                                                                   var="unidad"
+                                                                   itemValue="#{unidad.UIPid}"                                                
+                                                                   itemLabel="#{unidad.unidadAprendizajeUAPid.UAPnombre } -- #{unidad.grupoGPOid.GPOnumero} -- #{unidad.UIPsubgrupo } -- #{unidad.UIPtipoSubgrupo}" />
+                                                    <p:ajax event="valueChange" 
+                                                            listener="#{consultarPoliticasBeanUI.onSelectUA()}" 
+                                                            update="UnidadesAprendisaje :formId:profesores  formId:imprimir  
+                                                               selectCicloEscolar nomEmp" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+
+                                                </p:selectOneMenu>
+                                                
+                                                <p:selectOneMenu  id="UnidadesAprendizaje" 
+                                                                  value="#{consultarPoliticasBeanUI.idUaipSeleccionada}" 
+                                                                  style="width: 500px"
+                                                                  filter="true"
+                                                                  filterMatchMode="contains" autoWidth="false"
+                                                                  rendered="#{consultarPoliticasBeanUI.esAlumno()}"
+                                                                  >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción-- " /> 
+                                                    <f:selectItems id="select" 
+                                                                   value="#{consultarPoliticasBeanUI.politicasaceptadasRPE}" 
+                                                                   var="politica" 
+                                                                   itemValue="#{politica.UIPId.UIPid}"
+                                                                   itemLabel="#{politica.UIPId.unidadAprendizajeUAPid.UAPnombre} -- #{politica.UIPId.grupoGPOid.GPOnumero} -- #{politica.UIPId.UIPsubgrupo} -- #{politica.UIPId.UIPtipoSubgrupo}" />
+                                                    <p:ajax event="valueChange" 
+                                                            listener="#{consultarPoliticasBeanUI.onSelectUA()}" 
+                                                            update="UnidadesAprendisaje :formId:profesores  formId:imprimir  
+                                                               selectCicloEscolar nomEmp" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+
+                                                </p:selectOneMenu>
+                                                
+                                            </p:column>
+
+                                        </p:row>
+                                    </p:panelGrid>
+                                    <br></br>
+                                    <p:messages id="messages" showDetail="true" closable="true">
+                                            <p:autoUpdate />
+                                        </p:messages>
+ 
+                                          <p:panelGrid styleClass="mypanelgrid" columnClasses="centered" >
+                                        <p:row >
+                                            <p:column  colspan="2" styleClass="avance">
+
+                                                <b>Criterios:</b><br></br> 
+                                                <br></br>
+                                              
+                                                
+                                                
+                                                <p:dataTable id="tablaCriterios" value="#{consultarPoliticasBeanUI.politicaSeleccionada.politicaTieneCriterioList}" var="politicaCriterio" emptyMessage="Seleccione la unidad para mostrar criterios" >
+                                                    
+                                                    <p:column headerText="Criterios" >  
+                                                        <h:outputText value="#{politicaCriterio.CEVId.CEVNombre}" />  
+                                                    </p:column>
+                                                    <p:column id="porcentajes"   headerText="Porcentajes"  >
+                                                        <h:outputText value="#{politicaCriterio.porcentaje}" />  
+                                                    </p:column> 
+                                                    
+                                                    
+                                                </p:dataTable>
+                                                 <p:column colspan="1" styleClass="avance">
+                                                      <br></br>
+                                                <b>Criterios para exentar:</b><br></br>
+                                                <p:inputTextarea readonly="true" id="criterioExentarPO"  style="height:150px;width: 600px" value="#{consultarPoliticasBeanUI.politicaSeleccionada.POECriterioExentar}"  >
+                                                   
+                                                </p:inputTextarea> 
+                                                <br></br>
+                                               <b>Comentario:</b><br></br>
+                                               <p:inputTextarea readonly="true" id="textCom" style="height:150px;width: 600px" value="#{consultarPoliticasBeanUI.politicaSeleccionada.POEComentario}" > 
+                                                    
+                                                </p:inputTextarea>  
+                                                <br/>
+                                                <p:outputLabel rendered ="#{!consultarPoliticasBeanUI.esAlumno()}" ><b>Representante de grupo: </b> <br></br> </p:outputLabel>    
+                                                <p:outputLabel  rendered ="#{!consultarPoliticasBeanUI.esAlumno()}" id="representante"  value="#{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALMatricula} -- #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALNombre} #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALApellidoPater} #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALApellidoMaterno} -- #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALCorreo}"> </p:outputLabel>
+                                                
+                                                <p:outputLabel rendered ="#{consultarPoliticasBeanUI.esAlumno()}" ><b>Nombre del Profesor: </b> <br></br> </p:outputLabel>    
+                                                <p:outputLabel rendered ="#{consultarPoliticasBeanUI.esAlumno()}" id="nomprof" value="--#{consultarPoliticasBeanUI.politicaSeleccionada.UIPId.profesorPROid.PROnombre} #{consultarPoliticasBeanUI.politicaSeleccionada.UIPId.profesorPROid.PROapellidoPaterno} #{consultarPoliticasBeanUI.politicaSeleccionada.UIPId.profesorPROid.PROapellidoMaterno}"> </p:outputLabel>
+                                                
+                                             </p:column>
+                                               
+                                               
+                                                 
+                                            </p:column>
+ 
+                                        </p:row>
+                                    </p:panelGrid>
+                                    <br><br></br></br>
+                                         <p:dataTable 
+                                        id="tablaComentarios" rendered ="#{!consultarPoliticasBeanUI.esAlumno()}"  style="display: #{consultarPoliticasBeanUI.displayComentario}" value="#{consultarPoliticasBeanUI.politicaSeleccionada.politicaevaluacioncomentarioList}" var="comentario" emptyMessage="Seleccione la unidad para mostrar comentarios" >
+                                                    
+                                                    
+                                        <p:column  headerText="Comentario"   >
+                                                        <h:outputText value="#{comentario.PECComentario}" />  
+                                                    </p:column> 
+                                                    <p:column headerText="Fecha" style="text-align: center">  
+                                                        <h:outputText value="#{consultarPoliticasBeanUI.formatter.format(comentario.PECFechaComentario)}" />  
+                                                    </p:column>
+                                                    <p:column  headerText="Autor" style="text-align: center" >
+                                                        <h:outputText value="#{comentario.alumnoALId != null ? comentario.alumnoALId.ALNombre : comentario.profesorProId.PROnombre }  #{comentario.alumnoALId != null ? comentario.alumnoALId.ALApellidoPater : comentario.profesorProId.PROapellidoPaterno }  #{comentario.alumnoALId != null ? comentario.alumnoALId.ALApellidoMaterno : comentario.profesorProId.PROapellidoMaterno }" />  
+                                                    </p:column> 
+                                    </p:dataTable>
+                                    
+                                        <p:panelGrid styleClass="panelgrid"  style="margin-top: 30px" id="firmas" columnClasses="centered"  >
+                                        <p:row> 
+                                            <p:column styleClass="superior" style=" background: #459e00  50% 50% repeat-x; font-weight: bold; color: #ffffff; " colspan="1">
+                                                <center>
+                                                <b>Fecha creación</b>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" style=" background: #459e00  50% 50% repeat-x; font-weight: bold; color: #ffffff; " colspan="1">
+                                                <center>
+                                                <b>Fecha aceptación alumno</b>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" style=" background: #459e00  50% 50% repeat-x; font-weight: bold; color: #ffffff; " colspan="1">
+                                                <center>
+                                                <b>Fecha aceptación responsable</b>
+                                                </center>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row> 
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel  value="#{consultarPoliticasBeanUI.fechaCreacion}"/>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel  value="#{consultarPoliticasBeanUI.fechaAlumno}"/>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel  value="#{consultarPoliticasBeanUI.fechaResponsable}"/>
+                                                </center>
+                                            </p:column>
+                                        </p:row>
+                                        <p:row> 
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel value="#{consultarPoliticasBeanUI.politicaSeleccionada.UIPId.profesorPROid.PROapellidoPaterno} #{consultarPoliticasBeanUI.politicaSeleccionada.UIPId.profesorPROid.PROnombre}"/>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel value="#{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALApellidoPater} #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALApellidoMaterno} #{consultarPoliticasBeanUI.politicaSeleccionada.alumnoALId.ALNombre}"/>
+                                                </center>
+                                            </p:column>
+                                            <p:column styleClass="superior" colspan="1">
+                                                <center>
+                                                <p:outputLabel value=" #{consultarPoliticasBeanUI.politicaSeleccionada.responsablePROId.PROapellidoPaterno} #{consultarPoliticasBeanUI.politicaSeleccionada.responsablePROId.PROnombre}"/>
+                                                </center>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </div>
+                            </p:outputPanel>
+
+
+
+
+
+
+
+
+
+                            
+                            <p:commandButton id="imprimir" ajax="false" style="#{ConsultarPoliticasBeanUI.rendered()}"  value="Generar PDF" icon="ui-icon-disk" disabled="#{consultarPoliticasBeanUI.disableimp}" >                              
+                                <p:dataExporter id="exporter" preProcessor="#{consultarPoliticasBeanUI.preProcessPDF}" postProcessor="#{consultarPoliticasBeanUI.postProcessPDF}" encoding="iso-8859-1" type="PDF" target="tablaCriterios"  fileName="#{consultarPoliticasBeanUI.fileNamePdf}" />
+                            </p:commandButton>  
+
+                            <p:confirmDialog  
+                                global="true" id="geCD" 
+                                showEffect="fade" 
+                                hideEffect="fade" 
+                                style="color: #ccc" 
+                                styleClass="ventana" >
+                                <center>   
+                                    <p:commandButton value="Aceptar" 
+                                                     type="button" 
+                                                     styleClass="ui-confirmdialog-yes"
+                                                     icon="fa fa-fw fa-check"
+                                                     onclick="document.getElementById('formId:imprimir').click();"/>
+
+                                    <p:commandButton value="Cancelar" 
+                                                     type="button" 
+                                                     styleClass="ui-confirmdialog-no" 
+                                                     icon="fa fa-fw fa-times" />                   
+
+                                </center>
+                            </p:confirmDialog>
+
+
+                        </p:fieldset>
+                        <p:dialog widgetVar="status" modal="true" draggable="false"
+                                  closable="false" resizable="false" showHeader="false"
+                                  style="width: 50px;height: 50px;background: none;border: none">
+                            <p:graphicImage name="imagenes/gif-load.gif" />
+                        </p:dialog>
+                        
+                    </h:form>
+                    <h:form rendered="#{loginBean.formano}">
+                        <center><h1>No tienes permisos para ver esto</h1></center>
+                    </h:form>
+                </center>            
+            </h:body>
+        </f:view>
+    </ui:define>   
+</ui:composition>

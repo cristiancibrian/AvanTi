@@ -1,0 +1,951 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <f:facet name="first">
+            <meta content='text/html; charset=UTF-8' http-equiv="Content-Type" />
+            <title>SIRACT - Contenido Temático</title>
+        </f:facet>
+
+        <h:outputStylesheet name="Style.css" library="css" />
+        <h:outputStylesheet name="Style_botones.css" library="css"/>
+        <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces"/>
+    </h:head>
+
+
+
+    <ui:decorate template="/Template/MasterTemplate.xhtml">
+        <ui:define name="contenido">
+            <h:body  onkeypress="if (event.keyCode === 13) {
+                        return false;
+                    }" style="overflow: hidden">
+
+                <h:form id="form" styleClass="formulario" rendered="#{loginBean.permisoGeneral(catalogoCTBeanUI.IDCATALOGOADMICONTENIDO)}">
+                    <p:growl id="growl" showDetail="true" life="10000" escape="false"/>
+
+                    <p:fieldset id="field" legend="Administración de contenido temático" styleClass="myFieldset" style="position:relative; margin: 0 5% 10px 5%;">
+                        <p:panelGrid id="grid" styleClass="mypanelgrid" style="width: 50%; position:relative; margin: 10px 25% 30px 25%;">
+
+                            <p:row>
+                                <!--Filtro de programaEducativo-->
+                                <p:column styleClass="esquina" style="text-align: center;">
+                                    <b> Programa educativo:  </b>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="selecPE" value="#{catalogoCTBeanUI.selectedPE}" style="width: 450px; margin-top: 5px; margin-bottom: 5px" converter="javax.faces.Integer"
+                                                     autoWidth="false">
+                                        <f:selectItem itemValue="0" itemLabel = "-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaProgramaEducativo}" var="programaEducativo"
+                                                       itemValue="#{programaEducativo.PEDid}" itemLabel="#{programaEducativo.PEDnombre}"/>
+
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeProgramaEducativo()}" update="growl plan unidadesAP areas etapas versiones horasc horast horasl horassem arbol tablaPDF
+                                                clonar versionar eliminarVersion exportPDF exportExcel" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column styleClass="esquina" style="text-align: center;">
+                                    <b> Plan de estudio: </b>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="plan" value="#{catalogoCTBeanUI.selectedPlanE}" converter="javax.faces.Integer" style="width: 450px; margin-top: 5px; margin-bottom: 5px"
+                                                     autoWidth="false">
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaPlanEstudio}" var="plan"
+                                                       itemValue="#{plan.PESid}" itemLabel="#{plan.PESvigenciaPlan}"/>
+
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangePlanEstudio()}" update="unidadesAP areas etapas versiones horasc horast horasl horassem arbol tablaPDF
+                                                clonar versionar eliminarVersion exportPDF exportExcel" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="text-align: center;" >
+                                    <span><b> Unidad de aprendizaje: </b></span>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="unidadesAP" value="#{catalogoCTBeanUI.seleccionarUnidadAprendizaje}"
+                                                     style="width:450px; margin-top: 5px; margin-bottom: 5px"
+                                                     filter="true" filterMatchMode="contains" autoWidth="false">
+
+                                        <f:selectItem itemValue="0" itemLabel="-- Seleccione una opción -- "/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaUnidadAprendizaje}" var="uap"
+                                                       itemValue="#{uap.UAPclave} -- #{uap.UAPnombre} -- #{uap.UAPetapaFormacion}"
+                                                       itemLabel="#{uap.UAPclave} -- #{uap.UAPnombre}"/>
+
+                                        <p:ajax listener="#{catalogoCTBeanUI.onChangeUnidadAP()}" event="valueChange"
+                                                update="growl selecPE plan areas etapas versiones horasc horast horasl horassem arbol tablaPDF
+                                                clonar versionar eliminarVersion exportPDF exportExcel :form:messages" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="text-align: center;">
+                                    <b> Área de conocimiento: </b>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="areas" value="#{catalogoCTBeanUI.selectedAreaCon}" style="width: 450px; margin-top: 5px; margin-bottom: 5px" autoWidth="false"
+                                                     converter="javax.faces.Integer" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaAreaConocimiento}" var="area"
+                                                       itemValue="#{area.ACOid}" itemLabel="#{area.ACOnombre}"/>
+
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeAreaConocimiento()}" update="growl selecPE plan unidadesAP etapas versiones horasc horast horasl horassem arbol tablaPDF
+                                                clonar versionar eliminarVersion exportPDF exportExcel" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="text-align: center;">
+                                    <span><b> Etapa: </b></span>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="etapas" value="#{catalogoCTBeanUI.selectedEtapa}" style="width: 450px; margin-top: 5px; margin-bottom: 5px" autoWidth="false"
+                                                     converter="javax.faces.Integer" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos -- "/>
+                                        <f:selectItem itemValue="1" itemLabel="Básica"/>
+                                        <f:selectItem itemValue="2" itemLabel="Disciplinaria"/>
+                                        <f:selectItem itemValue="3" itemLabel="Terminal"/>
+
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeEtapa()}" update="unidadesAP horasc horast horasl,
+                                                horassem arbol tablaPDF eliminarVersion" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="text-align: center;">
+                                    <span><b> Versión: </b></span>
+                                </p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="versiones" value="#{catalogoCTBeanUI.versionSeleccionada}" style="width: 450px; margin-top: 5px; margin-bottom: 5px"
+                                                     converter="javax.faces.Integer" disabled="#{catalogoCTBeanUI.desactivarListaVersiones}" autoWidth="false">
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos -- "/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaVersiones}" var="ver"
+                                                       itemValue="#{ver}" itemLabel="#{ver}"/>
+
+                                        <p:ajax listener="#{catalogoCTBeanUI.onChangeVersion()}" event="valueChange"
+                                                update=":form:messages growl horasc horast horasl horassem arbol tablaPDF clonar versionar eliminarVersion exportPDF exportExcel"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="text-align: center;">
+                                    <span>
+                                        <b style="margin: 5px;">HC: </b>
+                                        <p:outputLabel  id="horasc" value="#{catalogoCTBeanUI.hc}" style="margin-right: 30px;#{catalogoCTBeanUI.estiloHorasC}" rendered="true" />
+                                        <b style="margin: 5px;">HL: </b>
+                                        <p:outputLabel id="horasl" value="#{catalogoCTBeanUI.hl}" style="margin-right: 30px;#{catalogoCTBeanUI.estiloHorasL}"/>
+                                    </span>                                   
+                                </p:column>
+
+                                <p:column style="width: 300px ; text-align: center;">
+                                    <span>
+                                        <b style="margin: 5px">HT: </b>
+                                        <p:outputLabel id="horast" value="#{catalogoCTBeanUI.ht}" style="margin-right: 30px;#{catalogoCTBeanUI.estiloHorasT}"/>
+                                        <b style="margin: 5px; ">Horas semestre: </b>
+                                        <p:outputLabel id="horassem" value="#{catalogoCTBeanUI.calculoHoras}" style="margin-right: 30px"/>
+                                    </span>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+
+                        <p:outputPanel id="botones" style="position:relative; margin: 0 37% 20px 37%" >
+                            <!--Botones-->
+                            <p:commandButton id="agregaUnidades" title="Agregar contenido" icon="fa fa-fw fa-plus" iconPos="center" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             update=":formAgregarLab:dialogAgPractLab :formAgregarTaller:dialogAgPractTaller :formDlg:dlgAgregar :formConfirm:confirmdlgId"
+                                             actionListener="#{catalogoCTBeanUI.iniciarAgregado()}"/>
+
+                            <p:commandButton id="eliminar" title="Eliminar contenido" icon="fa fa-fw fa-minus-circle" iconPos="center" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             update=":formEliminacion:dlgElim :formConfirm:confirmdlgId" actionListener="#{catalogoCTBeanUI.iniciarEliminado()}"/>
+
+                            <p:commandButton id="actualizar" title="Actualizar contenido" icon="fa fa-fw fa-pencil-square-o" iconPos="center" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             actionListener="#{catalogoCTBeanUI.iniciarActualizado()}" update=":formActualizacion:dlgActualizar :formConfirm:confirmdlgId"/>
+                            
+                             <!--Boton para generar reporte de contenido tematico -->
+                             <p:commandButton id="reporteContenido" title="Reporte de contenido tematico" icon="pi pi-chart-bar" iconPos="center"  onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             onclick="PF('confirmation').show()" >
+                                <p:confirm header="Reporte de contenido tematico" message="Generar reporte de contenido tematico del programa educativo: #{catalogoCTBeanUI.prograEdu.PEDnombre}"  />
+                            </p:commandButton>
+                            
+                             <p:confirmDialog  global="true" id="geCD" showEffect="fade" hideEffect="fade" style="color: #ccc" styleClass="ventana" >
+                                <center>   
+                                    <h:commandLink disabled="false" id="exportPDFReportes">
+                                         <p:graphicImage title="Formato pdf" name="imagenes/pdf2.png" styleClass="ui-confirmdialog-no"/>
+                                         <p:dataExporter id="exporter" postProcessor="#{catalogoCTBeanUI.postProcessPDFReporte}" encoding="iso-8859-1" type="PDF" target="tablaPDF" fileName="Reporte de contenido tematico -- LICENCIADO EN SISTEMAS COMPUTACIONALES"/>
+                                    </h:commandLink> <b/><b/>
+                                    
+                                    <h:commandLink rendered="false" disabled="false" id="exportExcelReportes">
+                                        <p:graphicImage title="Formato excel" name="imagenes/excel2.png" url="imagenes/excel2.png" styleClass="ui-confirmdialog-no"/>
+                                    </h:commandLink>
+                                    
+
+                                </center>
+                            </p:confirmDialog>
+
+                            <p:commandButton id="clonar" title="Clonar contenido" disabled="#{catalogoCTBeanUI.clonar}" icon="fa fa-fw fa-copy" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             update=":formClonacion:dlgClonar :formConfirm:confirmdlgId" actionListener="#{catalogoCTBeanUI.iniciarClonar()}"/>
+
+                            <p:commandButton id="versionar" title="Versionar contenido" disabled="#{catalogoCTBeanUI.desactivarVersionamiento}" icon="fa fa-fw fa-clone" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             update=":formVersionamiento:dlgVersionar :formConfirm:confirmdlgId" actionListener="#{catalogoCTBeanUI.iniciarVersionar()}"/>
+
+                            <p:commandButton id="eliminarVersion" title="Eliminar versión" disabled="#{!catalogoCTBeanUI.habilitarEliminarContenido()}" icon="fa fa-fw fa-trash" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                             update=":formEliminarVer:dlgEliminarVer :formConfirm:confirmdlgId" actionListener="#{catalogoCTBeanUI.iniciarEliminarVersion()}"/>
+
+                            <!--Boton imprimir-->
+                            <h:commandLink disabled="#{catalogoCTBeanUI.imprimir}" id="exportPDF">
+                                <p:graphicImage title="Descargar pdf" name="imagenes/pdf2.png" />
+                                <p:dataExporter id="exporter" postProcessor="#{catalogoCTBeanUI.postProcessPDF}" encoding="iso-8859-1" type="PDF" target="tablaPDF" fileName="#{catalogoCTBeanUI.nombreReporte}"/>
+                            </h:commandLink>
+
+                            <h:commandLink disabled="#{catalogoCTBeanUI.imprimir}" id="exportExcel" actionListener="#{catalogoCTBeanUI.exportarExcel()}">
+                                <p:graphicImage name="imagenes/excel2.png" url="imagenes/excel2.png"/>
+                            </h:commandLink>
+
+                        </p:outputPanel>
+
+
+
+                        <p:outputPanel style="text-align: center">
+                            <!-- Message para mostrar si horas han sido o no completadas-->
+                            <p:messages id="messages" showDetail="true" for="horas"/>
+                        </p:outputPanel>
+
+
+
+                        <p:outputPanel style="position:relative; margin: 0 10% 15px 10%">
+                            <!-- ********* Arbol ********** -->
+                            <p:scrollPanel style="height: 250px; padding-bottom: 10px" mode="native">
+                                <p:treeTable value="#{catalogoCTBeanUI.getUnidades()}" var="raiz" emptyMessage="Seleccione los conceptos para administrar un contenido temático."
+                                             id="arbol" selectionMode="single" selection="#{catalogoCTBeanUI.selectedNode}">
+
+                                    <f:facet name="header">
+                                        <h:outputLabel id="numeroReporte" value="Mantenimiento"/>
+                                    </f:facet>
+
+                                    <p:column style="width: 500px!important;" headerText="#{catalogoCTBeanUI.cabeceraColumna()}">
+                                        <h:outputText style="white-space: pre-line;width: 500px;#{catalogoCTBeanUI.horasCompletasNodo(raiz.horasCompletas, raiz.tipo)}" value="#{raiz.numero}. #{raiz.nombre}&#10;"/>
+                                    </p:column>
+
+                                    <p:column style="width:100px!important" headerText="Horas">
+                                        <center>
+                                            <h:outputText value="#{catalogoCTBeanUI.CTBeanHelper.horasAFormato(raiz.horas)}" />
+                                        </center>
+                                    </p:column>
+
+                                    <p:column style="width:100px!important" headerText="Porcentaje de horas">
+                                        <center>
+                                            <h:outputText value="#{catalogoCTBeanUI.CTBeanHelper.dosDecimales(raiz.porcentajeAvance)}%" />
+                                        </center>
+                                    </p:column>
+
+                                    <f:facet name="footer">
+                                    </f:facet>
+                                </p:treeTable>
+                            </p:scrollPanel>
+                        </p:outputPanel>
+
+
+
+                        <p:dataTable rendered="false"  id="tablaPDF" var="valor" value="">
+                            <p:column width="20">
+                                <p:outputLabel value=""></p:outputLabel>
+                            </p:column>
+                        </p:dataTable>
+                    </p:fieldset>
+                </h:form>
+
+
+
+
+                <h:form id="formDlg">
+                    <!-- ###### Dialogo agregar unidades, tema, subtema ######-->
+                    <p:dialog id="dlgAgregar" header="Agregar contenido temático" widgetVar="dlgUnidades" resizable="false" showEffect="fade"
+                              hideEffect="explode" modal="true" position="center" onShow="PF('dlgUnidades').initPosition()" responsive="true"
+                              draggable="false" closable="false" width="1100" >
+
+
+                        <p:outputLabel id="lblSeleccionados" value="Seleccione el tipo de contenido a agregar" style="display: block"/>
+                        <p:selectOneMenu id="seleccionados" value="#{catalogoCTBeanUI.contenidoSeleccionado.tipo}" converter="javax.faces.Integer" style="width: 350px" >
+
+                            <f:selectItem itemLabel="Unidad" itemValue="0"/>
+                            <f:selectItem itemLabel="Tema" itemValue="1"/>
+                            <f:selectItem itemLabel="Subtema" itemValue="2"/>
+
+                            <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}" onstart="PF('status').show()" oncomplete="PF('status').hide();"
+                                    update=":formDlg:tablaUnidad panelAgregar"/>
+                        </p:selectOneMenu>
+
+                        <p:panel id="panelAgregar" style="margin-top: 30px">
+                            <table border="0" cellspacing="7">
+                                <tbody>
+                                    <thead>
+                                        <tr>
+                                            <td><p:outputLabel value="Unidad:" rendered="#{catalogoCTBeanUI.habilitarListaUnidad()}"/></td>
+                                            <td>
+                                                <p:selectOneMenu id="unidades2" value="#{catalogoCTBeanUI.selectedUnidad}" style="width:280px" converter="javax.faces.Integer"
+                                                                 rendered="#{catalogoCTBeanUI.habilitarListaUnidad()}">
+
+                                                    <f:selectItem itemValue="-1" itemLabel="-- Seleccione una opción --"/>
+                                                    <f:selectItems value="#{catalogoCTBeanUI.listaNodosUnidad}" var="unidad"
+                                                                   itemValue="#{unidad.posicion}" itemLabel="#{unidad.numero}. #{unidad.nombre} "/>
+
+                                                    <p:ajax event="valueChange" process="@this" listener="#{catalogoCTBeanUI.cambiarUnidad()}"
+                                                            update="numero2 nombreS hdiSU paS temas :formDlg:tablaUnidad horasS"/>
+                                                </p:selectOneMenu>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td><p:outputLabel value="Tema:" rendered="#{catalogoCTBeanUI.contenidoSeleccionado.tipo == 2}"/></td>
+                                            <td>
+                                                <p:selectOneMenu id="temas" value="#{catalogoCTBeanUI.selectedTema}" style="width:280px" converter="javax.faces.Integer"
+                                                                 disabled="#{catalogoCTBeanUI.selectedUnidad == -1}" rendered="#{catalogoCTBeanUI.contenidoSeleccionado.tipo == 2}">
+
+                                                    <f:selectItem itemValue="-1" itemLabel="-- Seleccione una opción --"/>
+                                                    <f:selectItems value="#{catalogoCTBeanUI.listaNodosTema}" var="temaunidad"
+                                                                   itemValue="#{temaunidad.posicion}" itemLabel="#{temaunidad.numero}. #{temaunidad.nombre}"/>
+
+                                                    <p:ajax event="valueChange" process="@this" update="hdiSU paS nombreS horasS numero2 :formDlg:tablaUnidad"
+                                                            listener="#{catalogoCTBeanUI.cambiarTema()}"/>
+                                                </p:selectOneMenu>
+
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Número:</td>
+                                            <td>
+                                                <p:outputPanel id="numero2">
+                                                    <p:outputLabel id="preNumeroSubtema" rendered="#{!catalogoCTBeanUI.camposDeshabilitados}" value="#{catalogoCTBeanUI.preNumero}"/>
+
+                                                    <p:inputNumber id="numeroS" value="#{catalogoCTBeanUI.contenidoSeleccionado.numero}" disabled="#{catalogoCTBeanUI.camposDeshabilitados}"
+                                                                   size="2" autocomplete="off" minValue="0" maxValue="99" maxlength="2" decimalPlaces="0" emptyValue="zero">
+                                                    </p:inputNumber>
+                                                </p:outputPanel>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Nombre:</td>
+                                            <td>
+                                                <p:inputText maxlength="120" id="nombreS" value="#{catalogoCTBeanUI.contenidoSeleccionado.nombre}" size="60" disabled="#{catalogoCTBeanUI.camposDeshabilitados}"
+                                                             autocomplete="off">
+                                                    <p:keyFilter preventPaste="false"  regEx="/[A-Za-z0-9 áéóúíñÁÉÍÓÚÑ,&quot;()]/"/>
+                                                </p:inputText>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Horas:</td>
+                                            <td>
+                                                <p:inputMask id="horasS" mask="#{catalogoCTBeanUI.mascara}" size="4" value="#{catalogoCTBeanUI.hrsSolicitadas}"
+                                                             disabled="#{catalogoCTBeanUI.camposDeshabilitados}" slotChar="0" autocomplete="off">
+                                                    <p:ajax event="keyup" update="paS hdiSU" listener="#{catalogoCTBeanUI.validarHorasAgregar()}" delay="100"/>
+                                                </p:inputMask>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Horas disponibles para asignar:</td>
+                                            <td>
+                                                <p:outputLabel id="hdiSU" value="#{catalogoCTBeanUI.CTBeanHelper.horasAFormato(catalogoCTBeanUI.hrsDisponiblesConv)}"/>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Porcentaje de horas:</td>
+                                            <td>
+                                                <p:outputLabel id="paS" value="#{catalogoCTBeanUI.contenidoSeleccionado.porcentajeAvance} %"/>
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                </tbody>
+                            </table>
+                        </p:panel>
+
+                        <div style="text-align: center">
+                            <p:separator style="border-color: #F1A733"/>
+
+                            <p:commandButton value="Agregar" title="Agrega contenido" icon="ui-icon-circle-plus" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}"
+                                             update=":form:growl" process="dlgAgregar"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" oncomplete="PF('dlgUnidades').hide();" actionListener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}"/>
+                        </div>
+
+
+                        <!--Tabla de unidades -->
+                        <p:outputPanel style="margin-top: 20px">
+                            <p:scrollPanel style="height: 200px; padding-bottom: 10px" mode="native">
+                                <p:dataTable var="unidad" value="#{catalogoCTBeanUI.listaNodoCT}" id="tablaUnidad" emptyMessage="No hay contenido registrado">
+                                    <f:facet name="Header">
+                                        Unidades
+                                    </f:facet>
+                                    <p:column headerText="Unidades actuales">
+                                        <h:outputText value="#{unidad.numero}. #{unidad.nombre}"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </p:scrollPanel>
+                        </p:outputPanel>
+
+                    </p:dialog>
+                </h:form>
+
+
+
+                <h:form id="formAgregarLab">
+                    <!-- ###### Dialogo agregar practicas de laboratorio ######-->
+                    <p:dialog header="Agregar prácticas laboratorio" widgetVar="dlgPracticaslaboratorio" resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false" id="dialogAgPractLab">
+
+                        <p:separator>
+                            <p:column>
+                            </p:column>
+                            <p:column>
+                            </p:column>
+                        </p:separator>
+
+                        <p:panelGrid id="cap5" style="margin-top: 20px; position: relative;">
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Número:</center></p:column>
+                                <p:column>
+                                    <p:inputNumber  id="numeroPL" value="#{catalogoCTBeanUI.contenidoSeleccionado.numero}" emptyValue="zero"
+                                                    size="5" minValue="0" maxValue="99999" maxlength="5" decimalPlaces="0" autocomplete="off">
+                                    </p:inputNumber>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Nombre:</center></p:column>
+                                <p:column width="60">
+                                    <p:inputText id="nombrePL" maxlength="120" value="#{catalogoCTBeanUI.contenidoSeleccionado.nombre}" size="60" autocomplete="off">
+                                        <p:keyFilter preventPaste="false" regEx="/[A-Za-z0-9 áéóúíñÁÉÍÓÚÑ,&quot;()]/"/>
+                                    </p:inputText>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Horas:</center></p:column>
+                                <p:column>
+                                    <p:inputMask id="horasPL" mask="99:00" size="4" value="#{catalogoCTBeanUI.hrsSolicitadas}" autocomplete="off" slotChar="0">
+                                        <p:ajax event="keyup" update="paPL hdispPL" listener="#{catalogoCTBeanUI.validarHorasAgregar()}" delay="100"/>
+                                    </p:inputMask>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Horas disponibles para asignar:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="hdispPL" value="#{catalogoCTBeanUI.CTBeanHelper.horasAFormato(catalogoCTBeanUI.hrsDisponiblesConv)}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Porcentaje de horas:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="paPL"  value="#{catalogoCTBeanUI.CTBeanHelper.dosDecimales(catalogoCTBeanUI.contenidoSeleccionado.porcentajeAvance)}%"/>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton value="Agregar" title="Agrega contenido" icon="ui-icon-circle-plus" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}"
+                                             update=":form:growl" process="dialogAgPractLab"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" oncomplete="PF('dlgPracticaslaboratorio').hide();" actionListener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form id="formAgregarTaller">
+                    <!-- ###### Dialogo agregar practicas de taller ######-->
+                    <p:dialog header="Agregar prácticas taller" widgetVar="dlgPracticastaller" resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false" id="dialogAgPractTaller">
+
+                        <p:separator>
+                            <p:column>
+                            </p:column>
+                        </p:separator>
+
+                        <p:panelGrid id="cap6" style="margin-top: 20px; position: relative;">
+                            <p:row >
+                                <p:column style="font-weight: bold;" ><center>Número:</center></p:column>
+                                <p:column>
+                                    <p:inputNumber id="numeroPT" value="#{catalogoCTBeanUI.contenidoSeleccionado.numero}"
+                                                   size="5"  minValue="0" maxValue="99999" maxlength="5" decimalPlaces="0" autocomplete="off" emptyValue="zero">
+                                    </p:inputNumber>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Nombre:</center></p:column>
+                                <p:column width="60">
+                                    <p:inputText id="nombrePT" value="#{catalogoCTBeanUI.contenidoSeleccionado.nombre}" autocomplete="off" maxlength="120" size="60">
+                                        <p:keyFilter preventPaste="false"  regEx="/[A-Za-z0-9 áéóúíñÁÉÍÓÚÑ,&quot;()]/"/>
+                                    </p:inputText>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Horas:</center></p:column>
+                                <p:column>
+                                    <p:inputMask id="horasPT"  mask="99:00" size="4" value="#{catalogoCTBeanUI.hrsSolicitadas}" autocomplete="off" slotChar="0">
+                                        <p:ajax event="keyup" update="paPT  hdis" listener="#{catalogoCTBeanUI.validarHorasAgregar()}" delay="100"/>
+                                    </p:inputMask>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Horas disponibles para asignar:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="hdis" value="#{catalogoCTBeanUI.CTBeanHelper.horasAFormato(catalogoCTBeanUI.hrsDisponiblesConv)}" />
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Porcentaje de horas:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="paPT"  value="#{catalogoCTBeanUI.CTBeanHelper.dosDecimales(catalogoCTBeanUI.contenidoSeleccionado.porcentajeAvance)}%"/>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton value="Agregar" title="Agrega contenido" icon="ui-icon-circle-plus" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}"
+                                             update=":form:growl" process="dialogAgPractTaller"/>
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" oncomplete="PF('dlgPracticastaller').hide();" actionListener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form id="formEliminacion">
+                    <!-- ###### Dialogo de eliminacion ###### -->
+                    <p:dialog id="dlgElim" header="Eliminar contenido temático" widgetVar="dlgEliminar" resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false">
+
+                        <p:panelGrid style="margin-top: 20px; position: relative;">
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Número:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="numeroE" value="#{catalogoCTBeanUI.contenidoSeleccionado.numero}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold"><center>Nombre:</center></p:column>
+                                <p:column style=";width:500px;">
+                                    <p:outputLabel  id="nombreE" value="#{catalogoCTBeanUI.contenidoSeleccionado.nombre}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Horas:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="horasE" value="#{catalogoCTBeanUI.hrsSolicitadas}"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;"><center>Porcentaje de horas:</center></p:column>
+                                <p:column>
+                                    <p:outputLabel id="paE" value="#{catalogoCTBeanUI.CTBeanHelper.dosDecimales(catalogoCTBeanUI.contenidoSeleccionado.porcentajeAvance)}%"/>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton value="Eliminar" title="Eliminar contenido" icon="ui-icon-circle-check" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}" style="margin-bottom: 10px;"
+                                             update=":form:growl" process="dlgElim"/>
+
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" oncomplete="PF('dlgEliminar').hide();" style="margin-top: 10px;" actionListener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}"
+                                             update=":form:arbol :form:tablaPDF"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form id="formActualizacion">
+                    <!-- ###### Dialogo de actualizacion ###### -->
+                    <p:dialog id="dlgActualizar" header="Actualizar contenido temático" widgetVar="dlgActualizacion"  resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false">
+
+                        <p:panelGrid id="cap4" style="margin-top: 20px; position: relative">
+                            <p:row>
+                                <p:column style="font-weight: bold;">Número:</p:column>
+                                <p:column>
+                                    <p:outputLabel id="preNumActualizar">#{catalogoCTBeanUI.preNumero}</p:outputLabel>
+                                    <p:inputNumber id="numeroA" value="#{catalogoCTBeanUI.contenidoSeleccionado.numero}"
+                                                   size="5" autocomplete="off" minValue="0" maxValue="99999" maxlength="5" decimalPlaces="0" emptyValue="zero">
+                                    </p:inputNumber>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;">Nombre:</p:column>
+                                <p:column width="60">
+                                    <p:inputText id="nombreA" value="#{catalogoCTBeanUI.contenidoSeleccionado.nombre}"  maxlength="120" size="60" autocomplete="off">
+                                        <p:keyFilter preventPaste="false" regEx="/[A-Za-z0-9 áéóúíñÁÉÍÓÚÑ,&quot;()]/"/>
+                                    </p:inputText>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;">Horas:</p:column>
+                                <p:column>
+                                    <p:inputMask id="horasA" mask="#{catalogoCTBeanUI.mascara}" slotChar="0" size="4" value="#{catalogoCTBeanUI.hrsSolicitadas}" autocomplete="off">
+                                        <p:ajax event="keyup" update="paA hdispA" listener="#{catalogoCTBeanUI.validarHorasActualizar()}" delay="100"/>
+                                    </p:inputMask>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column style="font-weight: bold;">Horas disponibles para asignar:</p:column>
+                                <p:column>
+                                    <p:outputLabel id="hdispA" value="#{catalogoCTBeanUI.CTBeanHelper.horasAFormato(catalogoCTBeanUI.hrsDisponiblesConv)}"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column style="font-weight: bold;">Porcentaje de horas:</p:column>
+                                <p:column>
+                                    <p:outputLabel id="paA" value="#{catalogoCTBeanUI.CTBeanHelper.dosDecimales(catalogoCTBeanUI.contenidoSeleccionado.porcentajeAvance)}%"/>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton value="Actualizar" title="Actualizar contenido" icon="ui-icon-circle-check" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}" style="margin-bottom: 10px;"
+                                             update=":form:growl" process="dlgActualizar"/>
+
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" update=":form:arbol :form:tablaPDF"
+                                             oncomplete="PF('dlgActualizacion').hide()" actionListener="#{catalogoCTBeanUI.limpiarAlCambiarTipo()}"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form id="formClonacion">
+                    <!-- ###### Dialogo Clonar ###### -->
+                    <p:dialog id="dlgClonar" header="Clonar unidad de aprendizaje -- #{catalogoCTBeanUI.tipoUnidadAprendizajeClonar}"
+                              widgetVar="dlgClonar"  resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false" closeOnEscape="true">
+
+                        <p:panelGrid style="margin-top: 10px">
+                            <p:row>
+                                <p:column colspan="2" style="font-weight:bold">Unidad de aprendizaje seleccionada</p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Programa educativo:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.origenPEDNombre}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Plan de estudios:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.origenPESVigenciaPlan}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Unidad de aprendizaje:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.origenUAPNombre}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Versión seleccionada:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.versionSeleccionada}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Versión actual:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.listaVersiones.size()}" /></p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <p:panelGrid style="margin-top: 10px; margin-bottom: 10px">
+                            <p:row>
+                                <p:column><h:outputText value="Programa educativo:" /></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id ="selectedOrigenPED" value="#{catalogoCTBeanUI.destinoPEDId}"  style="width: 90%;" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.listaProgramaEducativo}" var="programaEducativo"
+                                                       itemValue="#{programaEducativo.PEDid}" itemLabel="#{programaEducativo.PEDnombre}"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeProgramaEducativoClonar()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="selectedOrigenPES selectedOrigenUAP selectedTipoClonacion clonacion"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Plan de estudios:" /></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="selectedOrigenPES" value="#{catalogoCTBeanUI.destinoPESId}"  style="width: 90%;"
+                                                     disabled="#{catalogoCTBeanUI.ableOrigenSomPES}" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.destinoListaPES}" var="programa"
+                                                       itemValue="#{programa.PESid}" itemLabel="#{programa.PESvigenciaPlan}"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangePlanEstudioClonar()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="selectedOrigenUAP selectedTipoClonacion clonacion"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Unidad de aprendizaje:"/></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id="selectedOrigenUAP" value="#{catalogoCTBeanUI.destinoUAPClave}"  style="width: 90%;"
+                                                     disabled="#{catalogoCTBeanUI.ableOrigenSomUAP}"
+                                                     filter="true" filterMatchMode="contains" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Todos --"/>
+                                        <f:selectItems value="#{catalogoCTBeanUI.destinoListaUPA}" var="uap"
+                                                       itemValue="#{uap.UAPclave}"
+                                                       itemLabel="#{uap.UAPclave} -- #{uap.UAPnombre}"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeUnidadAprendizajeClonar()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="selectedTipoClonacion clonacion"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Tipo de clonación:"/></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id ="selectedTipoClonacion" value="#{catalogoCTBeanUI.tipoClonacion}"  style="width: 90%;"
+                                                     disabled="#{catalogoCTBeanUI.ableTipoClonacion}"
+                                                     filter="true" filterMatchMode="contains" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Seleccione una opción --"/>
+                                        <f:selectItem itemValue="1" itemLabel="Horas sin asignar"/>
+                                        <f:selectItem itemValue="2" itemLabel="Horas asignadas"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeTipoClonacion()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="clonacion"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton id="clonacion" value="Clonar" title="Clonar contenido" icon="ui-icon-circle-check" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}" style="margin-bottom: 10px;"
+                                             update=":form:growl" process="dlgClonar" disabled="#{catalogoCTBeanUI.ableBotonClonar}"/>
+
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" update=":form:arbol :form:tablaPDF"
+                                             oncomplete="PF('dlgClonar').hide()" actionListener="#{catalogoCTBeanUI.limpiarVariablesClonacion()}"/>
+                        </div>
+
+                    </p:dialog>
+                </h:form>
+
+
+
+                <h:form id="formVersionamiento">
+                    <!-- ###### Dialogo Versionar ###### -->
+                    <p:dialog id="dlgVersionar" header="Versionar unidad de aprendizaje"
+                              widgetVar="dlgVersionar"  resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false" closeOnEscape="true">
+
+                        <p:panelGrid style="margin-top: 10px">
+                            <p:row>
+                                <p:column colspan="2" style="font-weight:bold">Unidad de aprendizaje seleccionada</p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Programa educativo:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.programaEducativoVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Plan de estudios:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.planEstudioVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Unidad de aprendizaje:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.UAPVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Versión seleccionada:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.versionSeleccionada}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Versión actual:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.verActual}" /></p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <p:panelGrid style="margin-top: 10px; margin-bottom: 10px">
+                            <p:row rendered="#{catalogoCTBeanUI.tieneClase()}">
+                                <p:column><h:outputText value="Tipo de versionamiento de Clase:" /></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id ="selectedTipoVersClase" value="#{catalogoCTBeanUI.tipoVersClase}"  style="width: 90%;"
+                                                     filter="true" filterMatchMode="contains" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Seleccione una opción --"/>
+                                        <f:selectItem itemValue="1" itemLabel="Sin horas"/>
+                                        <f:selectItem itemValue="2" itemLabel="Con horas"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeTipoVersionamiento()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="versionamiento"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row rendered="#{catalogoCTBeanUI.tieneTaller()}">
+                                <p:column><h:outputText value="Tipo de versionamiento de Taller:" /></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id ="selectedTipoVersTaller" value="#{catalogoCTBeanUI.tipoVersTaller}"  style="width: 90%;"
+                                                     filter="true" filterMatchMode="contains" >
+                                        <f:selectItem itemValue="0" itemLabel="-- Seleccione una opción --"/>
+                                        <f:selectItem itemValue="1" itemLabel="Sin horas"/>
+                                        <f:selectItem itemValue="2" itemLabel="Con horas"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeTipoVersionamiento()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="versionamiento"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+
+                            <p:row rendered="#{catalogoCTBeanUI.tieneLaboratorio()}">
+                                <p:column><h:outputText value="Tipo de versionamiento de Laboratorio:" /></p:column>
+                                <p:column>
+                                    <p:selectOneMenu id ="selectedTipoVersLab" value="#{catalogoCTBeanUI.tipoVersLab}"  style="width: 90%;"
+                                                     filter="true" filterMatchMode="contains">
+                                        <f:selectItem itemValue="0" itemLabel="-- Seleccione una opción --"/>
+                                        <f:selectItem itemValue="1" itemLabel="Sin horas"/>
+                                        <f:selectItem itemValue="2" itemLabel="Con horas"/>
+                                        <p:ajax event="valueChange" listener="#{catalogoCTBeanUI.onChangeTipoVersionamiento()}"
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="versionamiento"/>
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <!--Botones versionar y cancelar -->
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton id="versionamiento" value="Versionar" title="Versionar contenido" icon="ui-icon-circle-check" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}" style="margin-bottom: 10px;"
+                                             update=":form:growl" process="dlgVersionar" disabled="#{catalogoCTBeanUI.ableBotonVers}"/>
+
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" update=":form:arbol :form:tablaPDF"
+                                             oncomplete="PF('dlgVersionar').hide()" actionListener="#{catalogoCTBeanUI.limpiarVariablesVersionamiento()}"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+                <h:form id="formEliminarVer">
+                    <p:dialog id="dlgEliminarVer" header="Confirmar eliminar versión"
+                              widgetVar="dlgEliminarVer" resizable="false" showEffect="fade" hideEffect="explode" modal="true"
+                              draggable="false" position="center" closable="false" closeOnEscape="true">
+
+                        <p:panelGrid style="margin-top: 10px">
+                            <p:row>
+                                <p:column colspan="2" style="font-weight:bold">Unidad de aprendizaje seleccionada</p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Programa educativo:" style="font-weight:bold"/></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.programaEducativoVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Plan de estudios:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.planEstudioVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Unidad de aprendizaje:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.UAPVER}" /></p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column><h:outputText value="Versión seleccionada:" style="font-weight:bold" /></p:column>
+                                <p:column><h:outputText value="#{catalogoCTBeanUI.versionSeleccionada}" /></p:column>
+                            </p:row>
+                        </p:panelGrid>
+
+
+                        <div style="text-align: center; margin-top: 20px">
+                            <p:commandButton id="confirmarEliminado" value="Eliminar" title="Eliminar contenido" icon="ui-icon-circle-check" iconPos="left" actionListener="#{catalogoCTBeanUI.validarTodo()}" style="margin-bottom: 10px;"
+                                             update=":form:growl" onstart="PF('status').show()"/>
+
+                            <p:commandButton value="Cancelar" icon="ui-icon-circle-close" update=":form:arbol :form:tablaPDF"
+                                             oncomplete="PF('dlgEliminarVer').hide()" actionListener="#{catalogoCTBeanUI.limpiarVariablesVersionamiento()}"/>
+                        </div>
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form>
+                    <p:dialog header="Error de configuración" widgetVar="dlgSemanas" modal="true"
+                              resizable="false" showEffect="fade" hideEffect="explode"
+                              draggable="false" position="center" closable="false" closeOnEscape="false">
+                        <h:outputText value="El número de semanas del ciclo actual no han sido configuradas." />
+                        <br></br>
+                        <h:outputText value="Contacte al administrador." />
+                        <br></br>
+                        <p:commandButton value="Ir al inicio" type="button" onclick="window.location.replace(window.location.href = 'index.xhtml');"
+                                         title="Cancelar"  iconPos="center"
+                                         style="margin-top: 20px" />
+                    </p:dialog>
+                </h:form>
+
+
+
+
+                <h:form id="formConfirm">
+                    <p:confirmDialog id="confirmdlgId" showEffect="fade" hideEffect="explode" widgetVar="confirmdlg" header="Confirmación"
+                                     message="#{catalogoCTBeanUI.mensajeConfirm}" severity="alert" responsive="true">
+
+                        <div style="text-align: center">
+                            <p:commandButton value="Aceptar" actionListener="#{catalogoCTBeanUI.ejecutarAceptado()}" onstart="PF('status').show()" oncomplete="PF('confirmdlg').hide(); PF('status').hide()"
+                                             icon="ui-icon-check" update=":form:arbol :form:grid :form:botones :form:growl :formDlg:panelAgregar :formAgregarLab:cap5 :formAgregarTaller:cap6
+                                             :formDlg:tablaUnidad :form:messages" process="@this :form:messages"/>
+                            <p:commandButton value="Cancelar" oncomplete="PF('confirmdlg').hide()" icon="ui-icon-close"/>
+                        </div>
+                    </p:confirmDialog>
+                </h:form>
+
+
+
+
+                <!--****** Dialogo para "Cargando.." -->
+                <p:dialog widgetVar="status" modal="true" draggable="false" closable="false" resizable="false" showHeader="false"
+                          style="width: 50px;height: 50px;background: none;border: none; box-shadow: none">
+                    <p:graphicImage name="imagenes/gif-load.gif" />
+                </p:dialog>
+
+
+
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                            para volver a Siract.</h1></center>
+                </h:form>
+
+            </h:body>
+        </ui:define>
+    </ui:decorate>
+</ui:composition>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">   
+    <meta http-equiv="Expires" content="0" /> 
+    <meta http-equiv="Pragma" content="no-cache" />
+
+    <script type="text/javascript">
+        if (history.forward(1)) {
+            location.replace(history.forward(1));
+        }
+    </script>
+        
+    
+    <f:view contentType="text/html" >
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>   
+                <mate title=""/>
+                <meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>
+                <meta http-equiv="pragma" content="nocache"/>
+                <meta http-equiv="cache-control" content="no-cache"/>
+                <meta http-equiv="expires" content="0"/> 
+                <title>SIRACT</title>
+            </f:facet>
+            <h:outputStylesheet name="Style.css" library="css"/>
+        </h:head>
+        <h:body onload="#{loginBean.login()}">
+            <p:growl id="growl" showDetail="false" sticky="false" life="5000"/>
+   <p:idleMonitor onactive="PF('sessionTimeOutDialog').show();" timeout="#{session.maxInactiveInterval * 1000}" />
+			<p:dialog header="#{msg['error.sessionTimeOut.header']}" widgetVar="sessionTimeOutDialog" modal="true" closable="false" width="400" visible="false">
+			     <h:outputText value="Sesión expirada" />
+			     <input id="confirmBackToLogin" type="button" value="recargar"
+			        onclick="window.location='#{facesContext.externalContext.requestContextPath}/public.jsp';" />
+			</p:dialog>
+                <p:panel style="border: 2px solid #F1A733 !important; border-bottom: 0px !important; box-shadow: 0px -5px 1px 0px #F1A733 !important;">
+                <h:panelGroup id="anteencabezado">
+                    <ui:include src="AnteEncabezado.xhtml" />
+                    <h:panelGroup><ui:include src="Encabezado.xhtml"/><p:outputLabel value="Usuario:" style="font-weight: bold; margin-left: 70%;"/><p:spacer/><p:spacer/><p:spacer/>
+                        <p:spacer/><p:spacer/><p:spacer/><p:spacer/><p:spacer/><p:spacer/><p:outputLabel value="#{loginBean.logueado.USUusuario}@uabc.edu.mx"/></h:panelGroup>
+                </h:panelGroup >
+                </p:panel>
+   <p:panel style="border-left: 2px solid #F1A733 !important;
+                   border-right: 2px solid #F1A733 !important;
+                   border-bottom: 1px solid #F1A733 !important;
+                   border-top: 1px solid #F1A733 !important">
+                <h:panelGroup>
+                    <ui:include src="MenuTemplate.xhtml"/>
+                </h:panelGroup>
+       </p:panel>
+   <p:panel style="border: 2px solid #F1A733 !important; border-top: 0px !important;">
+                <p:scrollPanel mode="native" id="contenido">           
+
+                    <ui:insert name="contenido" />
+
+                </p:scrollPanel>
+       </p:panel>
+                <p:panel style="border: 2px solid #F1A733 !important;
+                                border-top: 0px!important;">
+                <h:panelGroup>
+                    <ui:include src="Pie.xhtml"/>
+                </h:panelGroup>
+                    </p:panel>
+        </h:body>
+    </f:view>
+</html>

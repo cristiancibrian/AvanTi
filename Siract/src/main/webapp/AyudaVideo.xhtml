@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+               template="/Template/MasterTemplate.xhtml" > 
+    <ui:define name="contenido">
+    <f:view contentType="text/html">  
+
+        <h:head>
+            <h:outputStylesheet name="Style.css" library="css"/>
+
+            <!--Script para poder anidar tablas expandibles -->
+            <script type="text/javascript">
+                
+            </script>
+            
+            
+            <f:facet  name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>Video de Ayuda</title> 
+            </f:facet>
+        </h:head>
+        <h:body>
+            <center>
+                <h:form id="formId" styleClass="formulario" style="width: 80%" rendered="#{loginBean.tienePermiso}">
+                    <center>
+                        <br></br>
+                        <iframe width="680" height="405" src="https://www.youtube.com/embed/xnjdUhI6lYs" allowfullscreen="" ></iframe>
+                    </center>
+                </h:form>
+            </center>            
+        </h:body>
+    </f:view>
+    </ui:define>   
+</ui:composition>

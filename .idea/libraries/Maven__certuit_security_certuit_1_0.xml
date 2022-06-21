@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: certuit:security-certuit:1.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/certuit/security-certuit/1.0/security-certuit-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/certuit/security-certuit/1.0/security-certuit-1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../../Dependencias/certuit-commons-security-1.0.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/certuit/security-certuit/1.0/security-certuit-1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

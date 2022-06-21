@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml" > 
+    <ui:define name="contenido">
+        <f:view contentType="text/html">  
+
+            <h:head>
+                <!--Script para poder anidar tablas expandibles -->
+                <script type="text/javascript">
+                    var siteFunctions = {
+                        //patch to fix a problem that the context menu disappears after update
+                        //delay the show to occure after the update 
+                        patchContextMenuShow: function () {
+                            'use strict';
+                            var protShow = PrimeFaces.widget.ContextMenu.prototype.show;
+                            siteFunctions.patchContextMenuShow.lastEvent = null;
+                            PrimeFaces.widget.ContextMenu.prototype.show = function (e) {
+                                var ret;
+                                if (e) {
+
+                                    //                console.log('saving last event');
+
+                                    siteFunctions.patchContextMenuShow.lastEvent = e;
+                                    siteFunctions.patchContextMenuShow.lastEventArg = arguments;
+                                    siteFunctions.patchContextMenuShow.lastEventContext = this;
+                                } else if (siteFunctions.patchContextMenuShow.lastEvent) {
+
+                                    //                console.log('executing last event');
+
+                                    ret = protShow.apply(siteFunctions.patchContextMenuShow.lastEventContext, siteFunctions.patchContextMenuShow.lastEventArg);
+
+                                    //                console.log('clearing last event');
+                                    siteFunctions.patchContextMenuShow.lastEvent = null;
+                                }
+                                return ret;
+                            };
+                        }
+                    };
+
+                    $(document).ready(function () {
+                        'use strict';
+                        try {
+                            siteFunctions.patchContextMenuShow();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+
+                    function sincronizar(valor) {
+                        document.getElementById("formId:observacion").value = valor;
+                    }
+
+                    //Funcion utilizada para actualizar etiqueta porcentaje desde el BackBean
+                    function avance(porcentaje) {
+                        document.getElementById("formId:actualizarAvance").click();
+                    }
+
+                    function pop() {
+                    }
+
+
+                    function obtenerArchivoActual() {
+
+                    }
+
+                </script>
+
+                <f:facet  name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Unidad academica</title> 
+                </f:facet>
+            </h:head>
+            <h:body onload="#{rACTConsultasBeanUI.refrescarForma(2)}">
+                <h:outputStylesheet name="Style.css" library="css"/>
+                <center>
+
+                    <!-- <h:form id="formId" styleClass="formulario" style="width: 80%; margin-right:13%" rendered="#{loginBean.tienePermiso}"> -->
+                    <h:form id="formId" styleClass="formulario" style="width: 80%; margin-right:13%" rendered="#{loginBean.permisoGeneral(rACTConsultasBeanUI.IDCATALOGORACTCONSULTA)}">                        
+                        <p:commandButton style="display: none;visibility: hidden" value="" id="actualizarAvance" update="formId:cAvance" />
+                        <p:growl id="growl" showDetail="true" life="5000" />
+
+                        <p:fieldset legend="Reporte de avance de contenido temático" styleClass="myFieldset" style="width: 100%; ">
+
+
+                            <p:outputPanel>
+                                <div>
+                                    <p:panelGrid styleClass="mypanelgrid" columnClasses="centered"  >
+                                        <p:row> 
+                                            <p:column styleClass="superior" colspan="1">
+                                                <span><b>Ciclo escolar: </b></span> 
+                                                <p:selectOneMenu id="selectCicloEscolar"  
+                                                                 value="#{rACTConsultasBeanUI.cicloEscolarSeleccionado}" 					 
+                                                                 style="width: 150px" 
+                                                                 autoWidth="false"
+                                                                 >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="Seleccione CE"/>
+
+                                                    <f:selectItems value="#{rACTConsultasBeanUI.listaCiclosEscolares}" 
+                                                                   var="CE"
+                                                                   itemValue="#{CE.CESid}"
+                                                                   itemLabel="#{CE.CEScicloEscolar}"/>
+                                                    <p:ajax
+                                                        update=":formId:selectProgramaEducativo :formId:profesores :formId:imprimir :formId:arbol :formId:UnidadesAprendisaje :formId:selectReporte :formId:fecha :formId:cAvance"
+                                                        listener="#{rACTConsultasBeanUI.onSelectCE()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"/>
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column styleClass="superior">
+                                                <span><b>Reporte: </b></span>
+                                                <p:selectOneMenu id="selectReporte"  
+                                                                 value="#{rACTConsultasBeanUI.reporteSeleccionado}" 
+                                                                 style="width: 200px"
+                                                                 autoWidth="false"
+                                                                 >
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="Seleccione reporte"/>
+                                                    <f:selectItem itemValue="1" 
+                                                                  itemLabel="Reporte #1"/>
+                                                    <f:selectItem itemValue="2" 
+                                                                  itemLabel="Reporte #2"/>
+                                                    <f:selectItem itemValue="3" 
+                                                                  itemLabel="Reporte #3"/>
+
+                                                    <p:ajax event="valueChange"
+                                                            update=":formId:arbol formId:arbol :formId:imprimir :formId:fecha :formId:cAvance :formId:UnidadesAprendisaje 
+                                                            :formId:selectProgramaEducativo :formId:arbol:numeroReporteErrorMsg :formId:arbol:numeroReporte"
+                                                            listener="#{rACTConsultasBeanUI.onSelectREPORTE()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                                            />
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column colspan="1" styleClass="esquina">
+                                                <b> Programa educativo:<br></br> </b>
+                                                <p:selectOneMenu id="selectProgramaEducativo"  
+                                                                 value="#{rACTConsultasBeanUI.programaEducativoSeleccionado}" 
+                                                                 style="width: 450px" autoWidth="false"
+                                                                 >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción  --"/>
+
+                                                    <f:selectItems value="#{rACTConsultasBeanUI.programasEducativosConsultas}" 
+                                                                   var="programa"
+                                                                   itemValue="#{programa.PEDid}"
+                                                                   itemLabel="#{programa.PEDnombre}"/> 
+
+                                                    <p:ajax event="valueChange" 
+                                                            update=":formId:UnidadesAprendisaje :formId:profesores :formId:selectCicloEscolar :formId:imprimir :formId:arbol :formId:fecha :formId:cAvance"
+                                                            listener="#{rACTConsultasBeanUI.onSelectPE()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                                            />
+                                                    />
+
+                                                </p:selectOneMenu>
+                                            </p:column>
+
+                                            <p:column styleClass="superior">
+                                                <span><b>Fecha: </b></span>
+                                                <p:outputLabel id="fecha" 
+                                                               value="#{rACTConsultasBeanUI.fechaActual}">
+                                                </p:outputLabel>
+                                            </p:column>
+
+
+
+
+                                            <p:column rowspan="2" 
+                                                      styleClass="avance">
+                                                <center><h3 id="identificador"><span><b>Avance global: </b></span><br></br>
+
+                                                        <p:outputLabel  value="#{rACTConsultasBeanUI.porcentajeAvance}%" 
+                                                                        id="cAvance">
+                                                        </p:outputLabel></h3></center>
+                                            </p:column>
+
+                                        </p:row>
+                                        <p:row >
+                                            <p:column colspan="2">
+                                                <span><b>Nombre de profesor: </b></span>
+                                                <br></br>
+                                                <p:outputLabel rendered ="#{rACTConsultasBeanUI.esProfesor()}" id="nomEmp" 
+                                                               value="#{rACTConsultasBeanUI.nombreCompletoProfesor}">
+                                                </p:outputLabel>
+
+
+                                                <p:selectOneMenu id ="profesores" rendered = "#{!rACTConsultasBeanUI.esProfesor()}"
+                                                                 value ="#{rACTConsultasBeanUI.profesorSeleccionado}"
+                                                                 style ="width: 420px;" filter="true" filterMatchMode="contains"
+                                                                 autoWidth="false"
+                                                                 >
+
+                                                    <f:selectItem itemLabel ="-- Seleccione un profesor --" itemValue ="0" />
+                                                    <f:selectItems value ="#{rACTConsultasBeanUI.profesores}" var = "profe" itemValue ="#{profe.PROid}"/>
+                                                    <p:ajax event ="valueChange"  
+                                                            update=":formId:UnidadesAprendisaje :formId:selectProgramaEducativo :formId:arbol :formId:imprimir :formId:cAvance :formId:fecha "
+                                                            listener = "#{rACTConsultasBeanUI.onSelectPROFESOR()}"  onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+                                                </p:selectOneMenu>
+                                            </p:column>
+                                            <p:column  colspan="2">
+                                                <span><b>Unidad de aprendizaje: </b> <br></br> </span>                                               
+                                                <p:selectOneMenu  id="UnidadesAprendisaje" 
+                                                                  value="#{rACTConsultasBeanUI.idUaipSeleccionada}" 
+                                                                  style="width: 500px"
+                                                                  filter="true"
+                                                                  filterMatchMode="contains" autoWidth="false"
+                                                                  >
+
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción-- " /> 
+                                                    <f:selectItems id="selectUA" 
+                                                                   value="#{rACTConsultasBeanUI.unidadesProfesor}" 
+                                                                   var="unidad"
+                                                                   itemValue="#{unidad.UIPid}"                                                
+                                                                   itemLabel="#{unidad.unidadAprendizajeUAPid.UAPnombre } -- #{unidad.grupoGPOid.GPOnumero} -- #{unidad.UIPsubgrupo } -- #{unidad.UIPtipoSubgrupo}" />
+                                                    <p:ajax event="valueChange" 
+                                                            listener="#{rACTConsultasBeanUI.onSelectUA()}" 
+                                                            update="UnidadesAprendisaje :formId:profesores tablaIconos formId:arbol:numeroReporteErrorMsg formId:imprimir formId:cAvance formId:fecha
+                                                            arbol tableContextMenu formId:arbol:numeroReporte tablaPDF selectCicloEscolar nomEmp" onstart="PF('status').show()" oncomplete="PF('status').hide()" />
+
+                                                </p:selectOneMenu>
+                                            </p:column>
+
+                                        </p:row>
+                                    </p:panelGrid>
+                                    <br></br>
+
+
+                                    <h:inputTextarea value="#{rACTConsultasBeanUI.observacion}" 
+                                                     id="observacion" 
+                                                     rows="6" 
+                                                     cols="33" 
+                                                     style="display: none;" />
+
+                                    <p:messages id="message" 
+                                                for="validarEnviado"  />
+
+                                    <h:panelGroup  id="tablaIconos" 
+                                                   style="#{rACTConsultasBeanUI.renderedPanelIconos()}"> 
+
+                                        <p:row>
+                                            <p:graphicImage name="imagenes/check.png" 
+                                                            width="20" 
+                                                            height="20" />
+                                            Completamente impartido
+                                        </p:row>
+                                        <p:row>
+                                            <p:graphicImage name="imagenes/warning.png" 
+                                                            width="20" 
+                                                            height="20"/>
+                                            Parcialmente impartido
+                                        </p:row>
+
+                                    </h:panelGroup>
+
+
+
+
+
+
+
+
+                                    <p:treeTable value="#{rACTConsultasBeanUI.pintarArbol()}" 
+                                                 var="raiz" 
+                                                 emptyMessage="#{rACTConsultasBeanUI.arbolEmptyMessage}"
+                                                 selection="#{rACTConsultasBeanUI.selectedNodes}"
+                                                 id="arbol" 
+                                                 style="max-width: 1200px!important;" > 
+
+                                        <p:ajax event="select" 
+                                                listener="#{rACTConsultasBeanUI.onNodeSelect}" 
+                                                update=":formId:cAvance"/>
+
+                                        <p:ajax event="unselect" 
+                                                listener="#{rACTConsultasBeanUI.onNodeUnselect}" 
+                                                update=" :formId:cAvance"/>
+
+                                        <f:facet name="header" >
+                                            <h:outputLabel
+                                                id ="numeroReporte"
+                                                rendered ="#{rACTConsultasBeanUI.reporteSeleccionado ne '00'}"
+                                                value="Reporte ##{rACTConsultasBeanUI.reporteSeleccionado}">
+                                            </h:outputLabel>
+
+                                            <h:outputLabel id="numeroReporteErrorMsg"
+                                                           rendered ="#{rACTConsultasBeanUI.reporteSeleccionado eq '00'}" 
+                                                           value="No se ha seleccionado un reporte">
+                                            </h:outputLabel>
+                                        </f:facet>
+
+
+                                        <p:column style="width: 500px!important;" >
+
+                                            <f:facet name="header">
+                                                Nombre de la unidad
+                                            </f:facet>
+                                            <p:graphicImage name="imagenes/check.png" 
+                                                            width="20" 
+                                                            height="20" 
+                                                            rendered="#{rACTConsultasBeanUI.selectableToImageConsultas(raiz)}"/>
+                                            <p:graphicImage 
+                                                name="imagenes/warning.png" 
+                                                width="20" 
+                                                height="20" 
+                                                rendered="#{rACTConsultasBeanUI.checkWarningImageConsultas(raiz)}"/>
+                                            <h:outputText style="white-space: pre-line" 
+                                                          escape="false" 
+                                                          value="#{raiz.numero}. #{raiz.nombre}&#10;"  />
+                                        </p:column>
+
+                                        <p:column style="width:70px!important" >
+                                            <f:facet name="header">
+                                                Horas
+                                            </f:facet>
+                                            <h:outputText value="#{rACTConsultasBeanUI.horasAFormato(raiz.horas)}" />
+                                        </p:column>
+                                        <p:column style="width:100px!important">
+                                            <f:facet name="header">
+                                                Porcentaje de avance
+                                            </f:facet>
+                                            <h:outputText value="#{rACTConsultasBeanUI.dosDecimales(raiz.porcentajeAvance)}" />
+                                        </p:column>
+                                        <p:column style="width:100px!important;">
+                                            <f:facet name="header">
+                                                Observaciones
+                                            </f:facet>
+                                            <center>   
+                                                <p:commandButton ajax="true" 
+                                                                 actionListener ="#{rACTConsultasBeanUI.prepararObservacion(raiz)}" 
+                                                                 process="@this" 
+                                                                 update=":formId:formaObservacion:textObservacion" 
+                                                                 id="obsPanel"  
+                                                                 oncomplete="PF('panelObservacion').show()" 
+                                                                 styleClass="invisible" 
+                                                                 icon="#{rACTConsultasBeanUI.observacionVacia(raiz)}" 
+                                                                 title="Observación" />
+                                                                 
+                                            </center>
+                                        </p:column>
+                                        <f:facet name="footer">
+                                        </f:facet>
+                                    </p:treeTable>
+
+
+                                    <p:contextMenu id="tableContextMenu" 
+                                                   for="arbol" 
+                                                   widgetVar="tableContextMenuWV" />
+
+                                    <p:dialog  resizable="false" 
+                                               widgetVar="panelObservacion" 
+                                               showEffect="fade" 
+                                               hideEffect="fade" 
+                                               header="Observaciones" >
+
+                                        <h:form id="formaObservacion">
+                                            <center>
+                                                <h:outputText id="contadorh" />
+                                                <br/>
+                                                <p:inputTextarea id="textObservacion" 
+                                                                 maxlength="250"  
+                                                                 counter="contadorh" 
+                                                                 counterTemplate="Caracteres disponibles {0} de 250 " 
+                                                                 value="#{rACTConsultasBeanUI.observacion}" 
+                                                                 rows="6" 
+                                                                 cols="33" 
+                                                                 style="overflow:auto;border-bottom: 5px solid  #F1A733 !important;"
+                                                                 readonly="true"
+                                                                 autoResize="false">
+
+                                                    <p:ajax event="change" 
+                                                            process="@this" />
+                                                </p:inputTextarea>  
+                                                <br/>
+
+                                                <p:commandButton value="Cerrar" 
+                                                                 oncomplete="PF('panelObservacion').hide()" 
+                                                                 ajax="true" 
+                                                                 process="@this" 
+                                                                 id="verObservacion" 
+                                                                 styleClass="boton" 
+                                                                 icon="fa fa-fw fa-times"
+                                                                 title="Observación"   >
+
+                                                    <p:ajax update="textObservacion" />
+                                                </p:commandButton>
+                                            </center>
+                                        </h:form>
+                                    </p:dialog>
+                                    <br/>
+                                </div>
+                            </p:outputPanel>
+
+
+
+                            <p:commandButton id="imprimir" 
+                                             ajax="false" 
+                                             style="#{rACTConsultasBeanUI.rendered()}"
+                                             value="Generar PDF" 
+                                             icon="ui-icon-disk"
+                                             >                              
+                                <p:dataExporter id="exporter" 
+                                                preProcessor="#{rACTConsultasBeanUI.preProcessPDF}" 
+                                                postProcessor="#{rACTConsultasBeanUI.postProcessPDF}" 
+                                                encoding="iso-8859-1" 
+                                                type="PDF" 
+                                                target="tablaPDF"
+                                                fileName="#{rACTConsultasBeanUI.nombreReporte}" />
+                            </p:commandButton>  
+
+                            <p:confirmDialog  
+                                global="true" id="geCD" 
+                                showEffect="fade" 
+                                hideEffect="fade" 
+                                style="color: #ccc" 
+                                styleClass="ventana" >
+                                <center>   
+                                    <p:commandButton value="Aceptar" 
+                                                     type="button" 
+                                                     styleClass="ui-confirmdialog-yes"
+                                                     icon="fa fa-fw fa-check"
+                                                     onclick="document.getElementById('formId:imprimir').click();"/>
+
+                                    <p:commandButton value="Cancelar" 
+                                                     type="button" 
+                                                     styleClass="ui-confirmdialog-no" 
+                                                     icon="fa fa-fw fa-times" />                   
+
+                                </center>
+                            </p:confirmDialog>
+
+
+                        </p:fieldset>
+                        <p:dialog widgetVar="status" modal="true" draggable="false"
+                                  closable="false" resizable="false" showHeader="false"
+                                  style="width: 50px;height: 50px;background: none;border: none">
+                            <p:graphicImage name="imagenes/gif-load.gif" />
+                        </p:dialog>
+                        <p:dataTable  rendered="false"
+                                      id="tablaPDF" 
+                                      var="valor" 
+                                      value="#{rACTConsultasBeanUI.filaTabla}" >
+
+                            <p:column width="20">
+                                <p:outputLabel value=""></p:outputLabel>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                    <h:form rendered="#{loginBean.formano}">
+                        <center><h1>No tienes permisos para ver esto</h1></center>
+                    </h:form>
+                </center>            
+            </h:body>
+        </f:view>
+    </ui:define>   
+</ui:composition>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.connection.characterEncoding">utf8</property>
+    <property name="hibernate.connection.CharSet">utf8</property>
+    <property name="hibernate.connection.isolation">2</property>
+    <property name="hibernate.connection.useUnicode">true</property>
+    <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
+    <property name="hibernate.current_session_context_class">thread</property>
+    <property name="hibernate.enable_lazy_load_no_trans">true</property>
+    <property name="hibernate.allow_update_outside_transaction">true</property>
+    <property name="hibernate.hikari.minimumIdle">10</property>
+    <property name="hibernate.hikari.maximumPoolSize">10</property>
+    <property name="hibernate.hikari.idleTimeout">30000</property>
+    <property name="hibernate.hikari.dataSourceClassName">com.mysql.jdbc.jdbc2.optional.MysqlDataSource</property>
+    <property name="hibernate.hikari.dataSource.url">jdbc:mysql://localhost:3306/siract?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true</property>
+    <property name="hibernate.hikari.dataSource.user">root</property>
+    <property name="hibernate.hikari.dataSource.password">root</property>
+
+
+      
+    <mapping class="mx.avanti.siract.entity.Alerta"/>
+    <mapping class="mx.avanti.siract.entity.Areaadministrativa"/>
+    <mapping class="mx.avanti.siract.entity.Areaconocimiento"/>
+    <mapping class="mx.avanti.siract.entity.Calendarioreporte"/>
+    <mapping class="mx.avanti.siract.entity.CalendarioreporteTieneAlerta"/>
+    <mapping class="mx.avanti.siract.entity.Campus"/>
+    <mapping class="mx.avanti.siract.entity.Catalogoreportes"/>
+    <mapping class="mx.avanti.siract.entity.Cicloescolar"/>
+    <mapping class="mx.avanti.siract.entity.Configuracion"/>
+    <mapping class="mx.avanti.siract.entity.Grupo"/>
+    <mapping class="mx.avanti.siract.entity.Mensaje"/>
+    <mapping class="mx.avanti.siract.entity.Permiso"/>
+    <mapping class="mx.avanti.siract.entity.Planestudio"/>
+    <mapping class="mx.avanti.siract.entity.Practicalaboratorio"/>
+    <mapping class="mx.avanti.siract.entity.Practicascampo"/>
+    <mapping class="mx.avanti.siract.entity.Practicasclinica"/>
+    <mapping class="mx.avanti.siract.entity.Practicataller"/>
+    <mapping class="mx.avanti.siract.entity.ProfesorPerteneceProgramaeducativo"/>
+    <mapping class="mx.avanti.siract.entity.Programaeducativo"/>
+    <mapping class="mx.avanti.siract.entity.Reporte"/>
+    <mapping class="mx.avanti.siract.entity.Reporteavancecontenidotematico"/>
+    <mapping class="mx.avanti.siract.entity.Rol"/>
+    <mapping class="mx.avanti.siract.entity.RolHasPermiso"/>
+    <mapping class="mx.avanti.siract.entity.Subtemaunidad"/>
+    <mapping class="mx.avanti.siract.entity.Temaunidad"/>
+    <mapping class="mx.avanti.siract.entity.Profesor"/>
+    <mapping class="mx.avanti.siract.entity.Unidad"/>
+    <mapping class="mx.avanti.siract.entity.Unidadacademica"/>
+    <mapping class="mx.avanti.siract.entity.Unidadacademicatipo"/>
+    <mapping class="mx.avanti.siract.entity.Unidadaprendizaje"/>
+    <mapping class="mx.avanti.siract.entity.UnidadaprendizajeImparteProfesor"/>
+    <mapping class="mx.avanti.siract.entity.Usuario"/>
+    <mapping class="mx.avanti.siract.entity.UnidadaprendizajeTieneContenidotematico"/>
+    <mapping class="mx.avanti.siract.entity.Subpermisos"/>
+    <mapping class="mx.avanti.siract.entity.Coordinadorareaadministrativa"/>
+    <mapping class="mx.avanti.siract.entity.ResponsableProgramaEducativo"/>
+    <mapping class="mx.avanti.siract.entity.Alumno"/>
+    <mapping class="mx.avanti.siract.entity.Criterioevaluacion"/>
+    <mapping class="mx.avanti.siract.entity.Politicaevaluacion"/>
+    <mapping class="mx.avanti.siract.entity.PoliticaTieneCriterio"/>
+    <mapping class="mx.avanti.siract.entity.AlumnoPerteneceGrupo"/>
+    <mapping class="mx.avanti.siract.entity.ResponsableProgramaEducativo"/>
+    <mapping class="mx.avanti.siract.entity.Politicaevaluacioncomentario"/>
+    <mapping class="mx.avanti.siract.entity.Articulos"/>
+  </session-factory>
+</hibernate-configuration>

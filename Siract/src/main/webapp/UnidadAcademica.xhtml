@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html"> 
+            
+            <h:head>
+                <h:outputStylesheet name="Style_botones.css" library="css"/>
+                <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>Unidad academica</title> 
+            </f:facet>
+        </h:head>
+            <h:body onload="#{unidadAcademicaBeanUI.filtrado()}"
+                    onkeydown="if (event.keyCode == 13) {
+                                event.preventDefault();
+                                return false;}">
+                
+                
+            
+                
+            <!--    <h:form id="formUni" rendered="#{loginBean.permisoGeneral(unidadAcademicaBeanUI.IDCATALOGOADMIUNIACADEMICA)}"> -->
+            <!-- <h:form id="formUni" rendered="#{loginBean.tienePermiso}"> -->
+            <h:form id="formUni" rendered="#{loginBean.permisoGeneral(unidadAcademicaBeanUI.IDCATALOGOADMIUNIACADEMICA)}">
+                <p:fieldset legend="Administración unidad académica"> 
+
+                    <p:commandButton id="showAltaButton"  icon="fa fa-fw fa-plus"  oncomplete="PF('dlg').show();" iconPos="center" 
+                                     rendered="#{loginBean.permisoAlta}"
+                                     actionListener="#{unidadAcademicaBeanUI.nuevo}" update="uacap" title="Agregar"/>
+                    <p:commandButton id="showEliminarButton" icon="fa fa-fw fa-minus-circle"  oncomplete="PF('dlg').show();" iconPos="center" 
+                                     rendered="#{loginBean.permisoBaja}"
+                                     actionListener="#{unidadAcademicaBeanUI.eliminar}" update="uacap" disabled="#{unidadAcademicaBeanUI.botones()}" title="Eliminar"/>
+                    <p:commandButton id="showModificarButton"  icon="fa fa-fw fa-pencil-square-o"   oncomplete="PF('dlg').show();" iconPos="center" 
+                                     rendered="#{loginBean.permisoModificar}"
+                                     actionListener="#{unidadAcademicaBeanUI.modificar}" update="uacap" disabled="#{unidadAcademicaBeanUI.botones()}" title="Modificar"/>
+
+                    <br/><br/>
+                    <div id="divFiltro1" style="display: inline-block">       
+                        <p:selectOneMenu id="unidadAca1"
+                                                     filter="true"
+                                                     
+                                                     value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.campus.CAMid}"
+                                                     disabled="#{unidadAcademicaBeanUI.deshabilitar}">  
+                                       <p:ajax event="valueChange" listener="#{unidadAcademicaBeanUI.filtrado2()}" update="uniacademica"></p:ajax>                                     
+                                        <f:selectItem itemLabel="Seleccionar todos los Campus" itemValue="#{0}" />  
+                                        <f:selectItems value="#{unidadAcademicaBeanUI.listaCampus}" 
+                                                       var="cam2"
+                                                       itemLabel="#{cam2.CAMnombre}"
+                                                       itemValue="#{cam2.CAMid}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!--<div style="text-align: right">-->
+                    <div style="text-align: right">
+                            <p:outputLabel style="font-size: 19px" value="Búsqueda específica de unidad académica: "/>
+                            <p:inputText id="filtro"    
+                                         value="#{unidadAcademicaBeanUI.busqueda}" 
+                                         autocomplete="off"
+                                         label="filtrado">
+                                <p:ajax event="keyup"  listener="#{unidadAcademicaBeanUI.filtrado()}" 
+                                        update="uniacademica"/>
+                            </p:inputText>
+                            <p:keyFilter for="filtro" regEx="/[a-z A-Z]/"/>
+                        </div>
+                    <p:growl id="idgrowl" showDetail="true" life="10000"/> 
+                    <br/><br/>
+                    
+                    <p:dataTable  id="uniacademica" var="academica" 
+                                  value="#{unidadAcademicaBeanUI.listaFiltrada}"
+                                  rowKey="#{academica.UACid}"
+                                  selection="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.listaSeleccionUA}"
+                                  rows="10"
+                                  rowsPerPageTemplate="5,10,15,20"
+                                  paginator="true"
+                                  rowSelectMode="add"
+                                  selectionMode="checkbox"
+                                  widgetVar="uniaca"
+                                  paginatorTemplate="{CurrentPageReport}
+                                  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                  {NextPageLink} {LastPageLink} 
+                                  {RowsPerPageDropdown}"
+                                  currentPageReportTemplate="({currentPage} de {totalPages})"
+                                  emptyMessage="No se encontró registro">
+                        <p:ajax event="rowSelect" update=":formUni:showEliminarButton,:formUni:showModificarButton" />
+                        <p:ajax event="rowUnselect" update=":formUni:showEliminarButton, :formUni:showModificarButton"/>
+                        <p:ajax event="rowSelectCheckbox" update=":formUni:showEliminarButton,:formUni:showModificarButton"> </p:ajax>
+                        <p:ajax event="rowUnselectCheckbox" update=":formUni:showEliminarButton,:formUni:showModificarButton"/>
+                        <p:ajax event="toggleSelect" update=":formUni:showEliminarButton,:formUni:showModificarButton"/>
+
+                         <p:column  selectionMode="multiple" style="width:16px;text-align:center">
+                         </p:column>
+                        <p:column headerText="Campus">  
+                            <h:outputText value="#{academica.campusCAMid.CAMnombre}" />  
+                        </p:column> 
+                        <p:column headerText="Clave unidad académica">  
+                            <h:outputText value="#{academica.UACclave}" />  
+                        </p:column>  
+                        <p:column headerText="Unidad académica">  
+                            <h:outputText value="#{academica.UACnombre}" />  
+                        </p:column>
+                    </p:dataTable> 
+
+                    <p:dialog id="uacap" header="#{unidadAcademicaBeanUI.header}" widgetVar="dlg" draggable="true" 
+                              resizable="true" showEffect="fade" 
+                              hideEffect="explode" modal="true">
+                        <p:ajax event="close" update=":formUni:uniacademica, :formUni:showEliminarButton, :formUni:showModificarButton, :formUni:cap,:formUni:seleccionados" 
+                                listener="#{unidadAcademicaBeanUI.limpiar()}"/>
+                        
+                        <p:outputLabel id="lblSeleccionados" rendered="#{unidadAcademicaBeanUI.mostrarSeleccionUA()}" value="Seleccione el registro a visualizar "></p:outputLabel>
+                           <br/><p:selectOneMenu id="seleccionados" 
+                                                 value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.selecUnidadAcademica.UACid}"                                                    
+                                             rendered="#{unidadAcademicaBeanUI.mostrarSeleccionUA()}"
+                                              > 
+                                <p:ajax event="valueChange" update="cap" listener="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.seleccionarRegistro()}"></p:ajax>
+
+                                <f:selectItems value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.listaSeleccionUA}"                                             
+                                               var="unidadaca"                      
+                                               itemLabel="#{unidadaca.UACnombre}"
+                                               itemValue="#{unidadaca.UACid}"/>                                             
+
+                            </p:selectOneMenu>
+                      
+                            <p:panelGrid id="cap" style="margin-top: 20px; position: relative"> 
+                                <p:row>
+                                    <p:column>Campus</p:column>  
+                                    <p:column colspan="4" style="font-weight: bold;">
+                                        <p:selectOneMenu id="campus" value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.campus.CAMid}" 
+                                                         disabled="#{unidadAcademicaBeanUI.deshabilitar}">  
+                                            <f:selectItem itemLabel="Seleccione el campus" itemValue="#{0}" />  
+                                            <f:selectItems value="#{unidadAcademicaBeanUI.listaCampus}" 
+                                                           var="cam"
+                                                           itemLabel="#{cam.CAMnombre}"
+                                                           itemValue="#{cam.CAMid}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                    </p:row>
+                                <p:row>
+                                    <p:column><p:outputLabel value="Clave unidad académica"/></p:column>
+                                    <p:column><p:inputText size="3" maxlength="4" id="clave" value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.unidadacademica.UACclave}" 
+                                                           disabled="#{unidadAcademicaBeanUI.deshabilitar}"/>
+                                         <p:keyFilter for="clave" regEx="/[0-9']/"/>
+                                    </p:column>
+                                </p:row>
+                                <p:row> 
+                                    <p:column><p:outputLabel value="Unidad académica"/></p:column>
+                                    <p:column><p:inputText id="nomua" onkeyup="value = value.toUpperCase()" value="#{unidadAcademicaBeanUI.unidadAcademicaBeanHelper.unidadacademica.UACnombre}" 
+                                                           disabled="#{unidadAcademicaBeanUI.deshabilitar}"/>
+                                        <p:keyFilter for="nomua" regEx="/[a-z''A-Z ]/"/>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                        <br/>
+                        <center>
+                            <p:commandButton value="Aceptar" icon="fa fa-fw fa-check" action="#{unidadAcademicaBeanUI.onClickSubmit()}" update=":formUni:idgrowl,cap,:formUni:uniacademica,:formUni:seleccionados">
+                                <p:ajax event="click" update=":formUni:showEliminarButton,:formUni:showModificarButton,:formUni:seleccionados"/>
+                                </p:commandButton>
+                            <p:commandButton value="Cancelar" icon="fa fa-fw fa-times" oncomplete="PF('dlg').hide()" disabled="">
+                                <p:ajax event="click" listener="#{unidadAcademicaBeanUI.limpiar()}" update=":formUni:showEliminarButton,:formUni:showModificarButton,:formUni:uniacademica,:formUni:uacap,:formUni:seleccionados"/>  
+                                </p:commandButton>
+                            </center>
+                    </p:dialog>
+                </p:fieldset> 
+            </h:form>
+                <p:confirmDialog id="confirmid" showEffect="fade" hideEffect="explode" 
+                                 widgetVar="conDlgElim" header="Confirmación" 
+                                 message="#{unidadAcademicaBeanUI.mensajeEliminar}"
+                                 severity="alert" appendTo="@(body)">
+                    <h:form>
+                        <center>
+                        <p:commandButton value="Aceptar"  action="#{unidadAcademicaBeanUI.eliminConfir()}" 
+                                         icon="ui-icon-check"
+                                         update=":formUni:idgrowl,:formUni:uniacademica,:formUni:cap,:formUni:seleccionados,:formUni:cap,:formUni:uacap, :formUni:unidadAca1">
+                           </p:commandButton>
+                        <p:commandButton value="Cancelar" rendered="#{unidadAcademicaBeanUI.renderCancelar}" oncomplete="PF('conDlgElim').hide()" icon="ui-icon-close"/>
+                        </center>
+                    </h:form>
+                </p:confirmDialog>
+                
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                        para volver a Siract.</h1></center>
+                </h:form>
+                
+        </h:body>
+    </f:view>
+</ui:define>
+</ui:composition>

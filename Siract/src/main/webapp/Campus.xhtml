@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html">   
+
+            <h:head>
+                <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces"/>
+                <f:facet name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Campus</title>
+                </f:facet>
+            </h:head>
+            <!--<p:scrollPanel style="width:1500px;height:400px">-->
+            <h:body onload="#{campusBeanUI.filtrado()}"
+                    onkeydown="if (event.keyCode == 13) {
+                                event.preventDefault();
+                                return false;
+                            }">
+                
+                
+                <!-- <h:form id="frmCampus" rendered="#{loginBean.tienePermiso}"> -->
+                <h:form id="frmCampus" rendered="#{loginBean.permisoGeneral(campusBeanUI.IDCATALOGOADMICAMPUS)}">
+                    <p:fieldset style="" legend="Administración de Campus">
+
+                        <p:commandButton id="showAltaButton"
+                                         icon="fa fa-plus"
+                                         title="Captura de Campus"
+                                         rendered="#{loginBean.permisoAlta}"
+                                         oncomplete="PF('dlgCapturaCampus').show();" 
+                                         actionListener="#{campusBeanUI.nuevo}"
+                                         update="capCampus"/>
+
+                        <p:commandButton id="showEliminarButton"
+                                         icon="fa fa-minus-circle"
+                                         title="Elimina Campus"
+                                         rendered="#{loginBean.permisoBaja}"
+                                         oncomplete="PF('dlgCapturaCampus').show();" 
+                                         iconPos="center"
+                                         actionListener="#{campusBeanUI.eliminar}"
+                                         update="capCampus"
+                                         disabled="#{campusBeanUI.deshabilitarBoton}"/>
+
+                        <p:commandButton id="showModificarButton"
+                                         icon="fa fa-edit"
+                                         title="Modifica Campus"
+                                         rendered="#{loginBean.permisoModificar}"
+                                         oncomplete="PF('dlgCapturaCampus').show();"
+                                         iconPos="center"
+                                         actionListener="#{campusBeanUI.modificar()}"
+                                         update="capCampus"
+                                         disabled="#{campusBeanUI.deshabilitarBoton}"/>
+
+                        <!--Command link para el creador de PDF's-->
+                        <h:commandLink disabled="#{!campusBeanUI.imprimir}" id="exportPDF" style="vertical-align: -10px">                                        
+                            <p:graphicImage title="Descargar pdf"
+                                            name="#{campusBeanUI.imagenPDF()}"
+                                            height="42"
+                                            width="42"/>
+
+                            <p:dataExporter id="exporter"
+                                            preProcessor="#{campusBeanUI.preProcessPDF}"
+                                            postProcessor="#{campusBeanUI.postProcessPDF}"
+                                            encoding="iso-8859-1"
+                                            type="PDF"
+                                            target="tbCampus"
+                                            fileName="#{campusBeanUI.nombre()}"/>
+                        </h:commandLink>
+
+                        <p:tooltip id="toolTipBtnExl" for="" value="Exportar a Excel" />
+                        <div style="text-align: right">
+                            <p:outputLabel style="font-size: 19px" value="Búsqueda específica de Campus: "/>
+                            <p:inputText id="filtro"    
+                                         value="#{campusBeanUI.busqueda}" 
+                                         autocomplete="off"
+                                         label="filtrado">
+                                <p:ajax event="keyup"  listener="#{campusBeanUI.filtrado()}" 
+                                        update="tbCampus, exportPDF" />
+                            </p:inputText>
+                            <p:keyFilter for="filtro" regEx="/[a-z]/"/>
+                        </div>
+                        <p:growl id="idgrowl" showDetail="true" life="10000"/>  
+
+                        <p:dataTable id="tbCampus" var="campus" 
+                                     value="#{campusBeanUI.listaFiltrada}"
+                                     rowKey="#{campus.CAMid}"
+                                     selection="#{campusBeanUI.campusBeanHelper.selectedCampus}"
+                                     selectionMode="single"
+                                     rows="10"
+                                     rowsPerPageTemplate="5,10,15,20"
+                                     paginator="true" 
+                                     paginatorTemplate="{CurrentPageReport}
+                                     {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                     {NextPageLink} {LastPageLink} 
+                                     {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="({currentPage} de {totalPages})"
+                                     emptyMessage="No se encontró registro">
+                            <p:ajax event="rowSelect" listener="#{campusBeanUI.habilitarBotons()}" update=":frmCampus:showEliminarButton,:frmCampus:showModificarButton" />
+                            <p:ajax event="rowUnselect" listener="#{campusBeanUI.deshabilitarBotons()}" update=":frmCampus:showEliminarButton, :frmCampus:showModificarButton"/>
+                            <!-- Multiseleccion  
+                            <p:column selectionMode="multiple"
+                                       style="width:16px;text-align:center">       
+                             </p:column>
+                            -->
+                            <p:column headerText="Campus">
+                                <h:outputText value="#{campus.CAMnombre}" /> 
+                            </p:column> 
+                        </p:dataTable>
+
+                        <p:dialog id="capCampus" header="#{campusBeanUI.header}" widgetVar="dlgCapturaCampus" draggable="false" 
+                                  resizable="false" showEffect="fade" 
+                                  hideEffect="explode" modal="true">  
+                            <p:panelGrid id="capCam" style="margin-top: 20px; position: relative"> 
+                                <p:row>
+                                    <p:column><p:outputLabel value="Campus"/></p:column>
+                                    <p:column><p:inputText id="ca" onkeyup="value = value.toUpperCase()" 
+                                                           value="#{campusBeanUI.campusBeanHelper.campus.CAMnombre}"
+                                                           disabled="#{campusBeanUI.deshabilitar}"/>
+                                        <p:keyFilter for="ca" regEx="/[a-z''A-Z ]/"/>
+                                    </p:column>
+                                </p:row>                                
+                            </p:panelGrid> 
+                            <br/>
+                            <center>
+                                <p:commandButton value="Aceptar" icon="ui-icon-check"  oncomplete="" action="#{campusBeanUI.onClickSubmit()}" update=":frmCampus:idgrowl,capCam,:frmCampus:tbCampus">
+                                    <p:ajax event="click" listener="#{campusBeanUI.deshabilitarBotons()}" update=":frmCampus:showEliminarButton,:frmCampus:showModificarButton"/>
+                                </p:commandButton>
+                                <p:commandButton value="Cancelar" icon="ui-icon-close" oncomplete="PF('dlgCapturaCampus').hide()">
+                                    <p:ajax event="click" listener="#{campusBeanUI.deshabilitarBotons()}" update=":frmCampus:showEliminarButton,:frmCampus:showModificarButton, :frmCampus:tbCampus"/>    
+                                </p:commandButton>  
+                            </center>
+                        </p:dialog>
+                    </p:fieldset>
+                </h:form> 
+                <p:confirmDialog id="confirmid" showEffect="fade" hideEffect="explode" 
+                                 widgetVar="conDlgElim" header="Confirmación" 
+                                 message="#{campusBeanUI.mensajeEliminar}"
+                                 severity="alert" appendTo="@(body)">
+                    <h:form>
+                        <center>
+                            <p:commandButton value="Aceptar" action="#{campusBeanUI.eliminConfir()}"
+                                             icon="ui-icon-check"
+                                             update=":frmCampus:idgrowl,:frmCampus:tbCampus,:frmCampus:capCam">
+                            </p:commandButton>
+                            <p:commandButton value="Cancelar" oncomplete="PF('conDlgElim').hide()" icon="ui-icon-close"/>
+                        </center>
+                    </h:form>
+                </p:confirmDialog>
+                
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el boton de inicio
+                        para volver a Siract.</h1></center>
+                </h:form>
+                
+            </h:body>
+            <!--</p:scrollPanel>-->
+        </f:view>
+    </ui:define>
+</ui:composition>

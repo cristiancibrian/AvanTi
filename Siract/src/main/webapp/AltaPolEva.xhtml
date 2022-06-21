@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml" > 
+    <ui:define name="contenido">
+        <f:view contentType="text/html">  
+
+            <h:head>
+                <!--Script para poder anidar tablas expandibles -->
+                <script type="text/javascript">
+                    var siteFunctions = {
+                        //patch to fix a problem that the context menu disappears after update
+                        //delay the show to occure after the update 
+                        patchContextMenuShow: function () {
+                            'use strict';
+                            var protShow = PrimeFaces.widget.ContextMenu.prototype.show;
+                            siteFunctions.patchContextMenuShow.lastEvent = null;
+                            PrimeFaces.widget.ContextMenu.prototype.show = function (e) {
+                                var ret;
+                                if (e) {
+
+                                    //                console.log('saving last event');
+
+                                    siteFunctions.patchContextMenuShow.lastEvent = e;
+                                    siteFunctions.patchContextMenuShow.lastEventArg = arguments;
+                                    siteFunctions.patchContextMenuShow.lastEventContext = this;
+                                } else if (siteFunctions.patchContextMenuShow.lastEvent) {
+
+                                    //                console.log('executing last event');
+
+                                    ret = protShow.apply(siteFunctions.patchContextMenuShow.lastEventContext, siteFunctions.patchContextMenuShow.lastEventArg);
+
+                                    //                console.log('clearing last event');
+                                    siteFunctions.patchContextMenuShow.lastEvent = null;
+                                }
+                                return ret;
+                            };
+                        }
+                    };
+
+                    $(document).ready(function () {
+                        'use strict';
+                        try {
+                            siteFunctions.patchContextMenuShow();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+
+                    function sincronizar(valor) {
+                        document.getElementById("formId:observacion").value = valor;
+                    }
+
+                    //Funcion utilizada para actualizar etiqueta porcentaje desde el BackBean
+                    function avance(porcentaje) {
+                        document.getElementById("formId:actualizarAvance").click();
+                    }
+
+                    function pop() {
+                    }
+                    function pdf() {
+                        document.getElementById('formId:imprimir').click();
+                    }
+                    //Funcion para guardar los porcentajes de evaluacion y actualizar el porcentaje en la vista
+                    function guardarPorcentajes() {
+                        x = true;
+                        y = 0;
+                        total = 0;
+                        while (x) {
+                            porcentaje = document.getElementById('formId:tablaCriterios:' + y + ':porcentajes_input');
+                            if (porcentaje == null)
+                                break;
+                            if (porcentaje.value != "")
+                                total = total + parseInt(porcentaje.value);
+                            y++;
+                        }
+                        document.getElementById('formId:cAvance').innerHTML = total + ".0%";
+                        console.log();
+                        if (total > 100)
+                            alert("Hey hay mas de 100");
+                    }
+
+                </script>
+
+                <f:facet  name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Unidad academica</title> 
+                </f:facet>
+            </h:head>
+
+
+
+            <h:body>
+                <h:outputStylesheet name="Style.css" library="css"/>
+                <center>
+
+                    <h:form id="formId" styleClass="formulario" style="width: 80%" rendered="#{loginBean.permisoGeneral(politicaEvaluacionBeanUI.IDCATALOGOPoliticaEval)}">
+
+                          <p:growl id="growl" showDetail="true" life="5000"/>
+                          
+                        <p:fieldset legend="Registrar política de evaluación" styleClass="myFieldset" style="width: 100%">
+                            
+                             
+                            <p:outputPanel>
+                             
+                                <div>
+                                    <p:panelGrid styleClass="mypanelgrid" columnClasses="centered">
+                                        <p:row>
+                                            <p:messages id="messages" showDetail="true" closable="true">
+                                                <p:autoUpdate />
+                                            </p:messages>
+                                            <p:column colspan="2" styleClass="esquina">
+                                                <b> Programa educativo:<br></br></b>
+                                                <p:selectOneMenu id="selectProgramaEducativo" autoWidth="false" value="#{politicaEvaluacionBeanUI.programaEducativoSeleccionado}" style="width: 610px"
+                                                                 disabled="#{politicaEvaluacionBeanUI.disablePE}">
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel=" -- Seleccione una opción -- "/> 
+                                                    <f:selectItems id="selectPrograma" value="#{politicaEvaluacionBeanUI.programasEducativosProfesor()}" var="programa"
+                                                                   itemValue="#{programa.PEDid}"
+                                                                   itemLabel="#{programa.PEDnombre}"/> 
+                                                    <p:ajax event="valueChange" listener="#{politicaEvaluacionBeanUI.onSelectPE()}" update="formId:UnidadesAprendisaje" />
+
+                                                </p:selectOneMenu>
+                                            </p:column>
+
+                                            <p:column styleClass="superior">
+                                                <span><b>Fecha: </b></span>
+                                                <p:outputLabel id="fecha" value="#{politicaEvaluacionBeanUI.fechaSistema}"></p:outputLabel>
+                                            </p:column>
+
+                                            <p:column styleClass="superior" colspan="2">
+                                                <span><b>Ciclo escolar: </b></span> 
+                                                <p:outputLabel value="#{politicaEvaluacionBeanUI.cicloEscolarActual}" id="ce"></p:outputLabel>
+                                            </p:column>
+                                        </p:row>
+
+                                        <p:row>
+                                            <p:column colspan="2">
+                                                <span><b>Unidad de aprendizaje:  </b> <br></br> </span>                                               
+                                                <p:selectOneMenu  id="UnidadesAprendisaje" autoWidth="false" value="#{politicaEvaluacionBeanUI.unidadAprendizajeSeleccionada}"  style="width: 610px" disabled="#{politicaEvaluacionBeanUI.disableUnidades}" >
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción --" /> 
+                                                    <f:selectItems id="selectUA" value="#{politicaEvaluacionBeanUI.unidadesProfesor}" 
+                                                                   var="profe"
+                                                                   itemValue="#{profe.UIPid}"
+                                                                   itemLabel="#{profe.unidadAprendizajeUAPid.UAPnombre} -- #{profe.grupoGPOid.GPOnumero} -- #{profe.UIPsubgrupo} -- #{profe.UIPtipoSubgrupo}" />
+                                                    <p:ajax event="valueChange" listener="#{politicaEvaluacionBeanUI.onSelectUA()}" update="formId:representante :formId:tablaCriterios" />
+
+                                                </p:selectOneMenu>   
+                                            </p:column>
+
+                                            <p:column colspan="3">
+                                                <span><b>Nombre de empleado: </b></span>
+                                                <p:outputLabel id="nomEmp" value="#{politicaEvaluacionBeanUI.nombreCompletoProfesor}"></p:outputLabel>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>     
+
+                            
+                                        <p:panelGrid styleClass="mypanelgrid" columnClasses="centered">
+                                        <p:row >
+                                            <p:column  colspan="2">
+
+                                                <b>Criterios de evaluación:</b> <b><p:outputLabel    id="textoSpinnerExam" value="# examenes:" style="margin-left: 90px; display: #{politicaEvaluacionBeanUI.renderSpinerExamen}"></p:outputLabel></b>
+                                                <br></br> 
+                                                <br></br>
+                                                
+                                                <p:selectOneMenu id="criteriosAlumnos" value="#{politicaEvaluacionBeanUI.idCriteriosEvaluacion}" converter="javax.faces.Integer" disabled="#{politicaEvaluacionBeanUI.disableMenuCriterios}" >                                                              
+                                                   <f:selectItem itemValue="00"
+                                                                  itemLabel=" -- Seleccione un criterio -- "/> 
+                                                    <f:selectItems value="#{politicaEvaluacionBeanUI.criteriosEvaluacion}"  itemValue="#{muestraCriterios.CEVId}" itemLabel="#{muestraCriterios.CEVNombre}" var="muestraCriterios" />                                
+                                                    <p:ajax event="valueChange" listener="#{politicaEvaluacionBeanUI.onSelectCriterio()}"  />
+
+                                                </p:selectOneMenu> 
+                                                 <p:spinner id="spinerExamen2" immediate="false" value="#{politicaEvaluacionBeanUI.NExamen}"  style="margin-left: 9%; display: #{politicaEvaluacionBeanUI.renderSpinerExamen}" size="9"  min="1" max="10" maxlength="2"  disabled="false" stepFactor="1">
+                                                     </p:spinner>
+                                                
+                                                <p:commandButton id ="agregarCriterio" style="margin-left:10px;" icon="fa fa-fw fa-plus" iconPos="center" title="Agregar" disabled="#{politicaEvaluacionBeanUI.disableBotonAC}" actionListener="#{politicaEvaluacionBeanUI.actualizarTablaCriterios()}"  > </p:commandButton>
+                                               
+                                                <p:outputLabel id="alertaCriterios" value=" #{politicaEvaluacionBeanUI.alertasCriterios}" style="color:red;"></p:outputLabel><br></br>  
+                                                <br></br> 
+                                                <p:dataTable id="tablaCriterios" value="#{politicaEvaluacionBeanUI.listaPoliticaCriterio}" scrollable="true" scrollHeight="200" var="muestraCrit" emptyMessage="Seleccione los criterios para registrar los porcentajes" >
+                                                   
+                                                    <p:column headerText="Criterios" width="280"> 
+                                                        <center>
+                                                            <h:outputText value="#{muestraCrit.CEVId.CEVNombre } #{muestraCrit.NExamen >0 ?  '(' : '' } #{muestraCrit.NExamen >0 ?  muestraCrit.NExamen : '' } #{muestraCrit.NExamen >0 ?  ')' : '' }" > </h:outputText>
+                                                        </center>
+                                                    </p:column>
+                                                    <p:column id="porcentajes"   headerText="Porcentajes"  width="160">
+                                                        <center>
+                                                            <p:spinner id="porcen"  immediate="false" style="margin-left: 7%;" size="9"  min="0" max="#{politicaEvaluacionBeanUI.porcentajeMax}" maxlength="3"  disabled="false" stepFactor="#{politicaEvaluacionBeanUI.stepFactor}"  value="#{muestraCrit.porcentaje}">
+                                                       
+                                                             <p:keyFilter regEx="/[0-9]/"/>
+                                                           
+                                                            <p:ajax event="change" process="@this"  listener="#{politicaEvaluacionBeanUI.actualizarSumaPorcentajes()}"  update="formId:mensajeSum :formId:cAvance" />
+
+                                                        </p:spinner>
+                                                        </center>
+                                                    </p:column> 
+                                                    <p:column width="30">
+                                                        <center>
+                                                        <p:commandButton icon="fa fa-fw fa-minus-circle"  title="Eliminar" iconPos="center" actionListener="#{politicaEvaluacionBeanUI.quitarCriterios(muestraCrit)}"></p:commandButton>
+                                                    </center>
+                                                    </p:column>
+                                                    <!--
+                                                   <f:facet id="numeroexamen" name="footer">
+                                                        <p:outputLabel style="margin-left: 3%;" id="textoExamen" rendered="#{politicaEvaluacionBeanUI.disableTextoExamen}">Numero de examenes</p:outputLabel>
+                                                        <p:spinner id="spinerExamen" immediate="false" value="#{politicaEvaluacionBeanUI.NExamen}" rendered="#{politicaEvaluacionBeanUI.disableSpinerExamen}" style="margin-left: 13%;" size="9"  min="1" max="10" maxlength="2"  disabled="false" stepFactor="1">
+                                                            <p:ajax event="change" process="@this" listener="#{politicaEvaluacionBeanUI.actualizarSumaPorcentajes()}" update="formId:mensajeSum :formId:cAvance" />
+                                                        </p:spinner>
+                                                    </f:facet>
+                                                    -->
+                                                </p:dataTable>
+                                                
+                                            </p:column>
+                                            <p:column  colspan="2">
+                                                <br></br>
+                                                <b>Criterios para exentar: </b><br></br>
+                                                <p:inputTextarea id="criterioExentar" style="height:100px;width: 600px" value="#{politicaEvaluacionBeanUI.criterioExentar}" scrollHeight="100" autoResize="false" disabled="#{politicaEvaluacionBeanUI.disableCriterioEX}" >
+                                                    <p:ajax event="keyup" listener="#{politicaEvaluacionBeanUI.keyupCriterioExentar()}"></p:ajax>
+                                                </p:inputTextarea> 
+                                                <br></br>
+                                                
+                                             <b>Comentarios adicionales:</b><br></br>
+                                             <p:inputTextarea id="textCom" style="height:100px;width: 600px" value="#{politicaEvaluacionBeanUI.comentarioOpcional}" autoResize="false" scrollHeight="100" disabled="#{politicaEvaluacionBeanUI.disableComentarios}"> 
+                                                    <p:ajax event="keyup" listener="#{politicaEvaluacionBeanUI.keyupComentarios()}"></p:ajax>
+                                                </p:inputTextarea>
+                                                
+                                            </p:column>
+
+                                        </p:row>
+                                        <p:row>
+                                            <p:column colspan="2" styleClass="avance" >
+                                                <b><p:outputLabel style="color:black; margin-left:65px;" value="Suma de porcentajes:"></p:outputLabel>
+                                                    <p:outputLabel  value=" #{politicaEvaluacionBeanUI.sumaPorcentajes}%" style="#{politicaEvaluacionBeanUI.estiloSumaPor} margin-left:130px;" id="cAvance"></p:outputLabel></b><br/><br/>
+                                                    <center> <p:outputLabel value="#{politicaEvaluacionBeanUI.mensajePorcentajes}" style="#{politicaEvaluacionBeanUI.estiloSumaPor}" id="mensajeSum"></p:outputLabel></center>
+                                            </p:column>
+                                            
+                                            <p:column colspan="1" styleClass="avance">
+                                                <span><b>Representante de grupo: </b> <br></br> </span>                                               
+                                                <p:selectOneMenu  id="representante" value="#{politicaEvaluacionBeanUI.representanteGrupo}" filter="true" filterMatchMode="contains" disabled="#{politicaEvaluacionBeanUI.disableRepresentante}">
+                                                    <f:selectItem itemValue="00" itemLabel="-- Seleccione una opción-- " /> 
+                                                    <f:selectItems  value="#{politicaEvaluacionBeanUI.alumnosClase}" var="al" itemValue="#{al.ALId}" itemLabel="#{al.ALApellidoPater} #{al.ALApellidoMaterno} #{al.ALNombre}  -- #{al.ALMatricula} "/>
+                                                    <p:ajax event="change" listener="#{politicaEvaluacionBeanUI.onSelectRepresentate()}" update="formId:ge :formId:gs"/>
+                                                </p:selectOneMenu>  
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </div>   
+                             </p:outputPanel>
+                            <br/>
+                           
+                            <p:commandButton  value="Guardar cambios"  onclick="PF('confirmation').show()" id="gs" icon="ui-icon-disk" disabled="#{politicaEvaluacionBeanUI.disableBotonGC}" >
+                             
+                            </p:commandButton>
+
+                            <p:confirmDialog message="Su avance será guardado y podrá continuar después, ¿Desea continuar?" header="Confirmación" severity="alert" widgetVar="confirmation">
+                                <center>
+                                    <p:commandButton value="Aceptar"  actionListener="#{politicaEvaluacionBeanUI.guardarPolitica(false, false)}" onclick="PF('confirmation').hide()"   onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()"  styleClass="ui-confirmdialog-yes" icon="fa fa-fw fa-check"
+                                                     update="formId:growl :formId:selectProgramaEducativo"/>
+
+                                    <p:commandButton  value="Aceptar y generar PDF" actionListener="#{politicaEvaluacionBeanUI.guardarPolitica(false, true)}" onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()"
+                                                       icon="fa fa-fw fa-check" update="formId:growl :formId:selectProgramaEducativo" >
+                                        
+                                        <p:ajax event="click" oncomplete="PF('confirmation').hide()" />
+                                      
+                                    </p:commandButton >
+                            
+
+                                    <p:commandButton  value="Cancelar" onclick="PF('confirmation').hide()" type="button"  styleClass="ui-confirmdialog-no" icon="fa fa-fw fa-times" />
+                                </center>
+                            </p:confirmDialog>
+                            <p:commandButton process="@this" value="Guardar y enviar"  id="ge" icon="ui-icon-disk" styleClass="boton" actionListener="#{politicaEvaluacionBeanUI.guardarPolitica(true, false)}" onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()" disabled="#{politicaEvaluacionBeanUI.disableBotones()}" 
+                                             update="formId:selectProgramaEducativo">
+                                <p:confirm header="Confirmación" message="La política de evaluación será registrada y se le enviará correo al responsable de grupo, ¿Desea continuar?" icon="ui-icon-alert" />                      
+                                  
+                               
+                            </p:commandButton>
+                            
+                            <p:commandButton  id="imprimir" ajax="false" style="#{politicaEvaluacionBeanUI.rendered()}"  value="Generar PDF" icon="ui-icon-disk"  >                              
+                                <p:dataExporter id="exporter" preProcessor="#{politicaEvaluacionBeanUI.preProcessPDF}" postProcessor="#{politicaEvaluacionBeanUI.postProcessPDF}" encoding="iso-8859-1" type="PDF" target="tablaPDF"  fileName="#{politicaEvaluacionBeanUI.fileNamePdf}" />
+                            </p:commandButton>  
+                            
+
+                          
+                            <p:confirmDialog  global="true" id="geCD" showEffect="fade" hideEffect="fade" style="color: #ccc" styleClass="ventana" >
+                                <center>   
+                                    <p:commandButton value="Aceptar " type="button" styleClass="ui-confirmdialog-yes"    onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()"
+                                                      />
+                                       
+                                    <p:commandButton value="Cancelar " type="button" styleClass="ui-confirmdialog-no"  />                   
+
+                                </center>
+                            </p:confirmDialog>
+                            <p:dataTable  rendered="false" id="tablaPDF" var="valor" value="" >
+                               <p:column width="20">
+                                <p:outputLabel value=""></p:outputLabel>
+                            </p:column>
+                        </p:dataTable>
+                           
+                            
+                             
+                             </p:fieldset>
+                        
+                    
+
+                     </h:form>
+                          <h:form rendered="#{loginBean.formano}">
+                        <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el botón de inicio
+                                para volver a Siract.</h1></center>
+                 </h:form>
+                    <p:dialog widgetVar="cargando" modal="true" draggable="false" closable="false" resizable="false" showHeader="false"
+                          style="width: 50px;height: 50px;background: none;border: none; box-shadow: none">
+                    <p:graphicImage name="imagenes/gif-load.gif"/>
+                </p:dialog>
+             </center>
+          </h:body>
+        </f:view>
+    </ui:define>   
+</ui:composition>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/Template/MasterTemplate.xhtml" > 
+    <ui:define name="contenido">
+        <f:view contentType="text/html">  
+
+            <h:head>
+                <!--Script para poder anidar tablas expandibles -->
+              
+
+                <f:facet  name="first">
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Aceptar Politica</title> 
+                </f:facet>
+            </h:head>
+
+
+
+            <h:body >
+                <h:outputStylesheet name="Style.css" library="css"/>
+                <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces" />
+                <center>
+
+                    <h:form id="formId" styleClass="formulario" style="width: 80%" rendered="#{loginBean.permisoGeneral(aceptarPoliticaBeanUI.IDCATALOGOACEPTARPOLITICA)}">
+
+                        <p:growl id="growlPolitica" showDetail="true" life="8000" />
+                      
+                        <p:fieldset legend="Aceptar política de evaluación" styleClass="myFieldset" style="width: 100%">
+
+                            <p:outputPanel>
+                                <div>
+                                    <p:panelGrid styleClass="mypanelgrid" columnClasses="centered" >
+                                         <p:row>     
+                                            <p:column colspan="" styleClass="esquina">
+                                                <b>  <p:outputLabel  value="#{aceptarPoliticaBeanUI.textoNombreUsuario}" id="textoNombre"></p:outputLabel></b> <br/>
+                                                <p:outputLabel id="nomEmp" value="#{aceptarPoliticaBeanUI.nombreCompleto}"></p:outputLabel>
+
+                                             </p:column>
+                                            
+                                                 
+                                                    <p:column styleClass="esquina" >
+                                                        <span ><b>Ciclo escolar: </b></span> <br/>
+                                                        <p:outputLabel  value="#{aceptarPoliticaBeanUI.cicloEscolar}" id="ce"></p:outputLabel>
+
+                                                    </p:column>
+                                                     <p:column styleClass="esquina">
+                                                        <span><b>Fecha: </b></span> <br/>
+                                                        <p:outputLabel id="fecha" value="#{aceptarPoliticaBeanUI.fechaActual}"></p:outputLabel>
+                                                    </p:column>
+                                             <p:column style="width:200px" styleClass="esquina">
+                                               
+                                             </p:column>
+                                            
+                                        </p:row>     
+                                        <p:row>    
+                                            
+                                            
+
+                                            <p:column colspan="2" styleClass="esquina">
+                                                <span><b>Unidad de aprendizaje: </b> <br></br> </span>                                               
+                                                <p:selectOneMenu  disabled="#{aceptarPoliticaBeanUI.disableSelect}" id="UnidadesAprendisaje" autoWidth="false" value="#{aceptarPoliticaBeanUI.uipIdSeleccionado}"  style="width: 610px" >
+                                                    <f:selectItem itemValue="00"
+                                                                  itemLabel="-- Seleccione una opción-- " /> 
+                                                    <f:selectItems id="selectUA" value="#{aceptarPoliticaBeanUI.politicasPendientes}" 
+                                                                   var="politica" 
+                                                                   itemValue="#{politica.UIPId.UIPid}"
+                                                                   itemLabel="#{politica.UIPId.unidadAprendizajeUAPid.UAPnombre} -- #{politica.UIPId.grupoGPOid.GPOnumero} -- #{politica.UIPId.UIPsubgrupo} -- #{politica.UIPId.UIPtipoSubgrupo}" />
+                                                    <p:ajax event="valueChange" listener="#{aceptarPoliticaBeanUI.onSelectPolitica()}"  /> 
+
+                                                </p:selectOneMenu>  
+                                            </p:column>
+                                            <p:column   styleClass="superior">
+                                                <b>Políticas Pendientes:</b> <h:outputText id="pendientesCount" value=" #{aceptarPoliticaBeanUI.politicasPendientesCount}" />  
+                                            </p:column>
+
+
+
+                                        </p:row>
+                                    </p:panelGrid>
+                                          <p:panelGrid styleClass="mypanelgrid" columnClasses="centered" >
+                                        <p:row >
+                                            <p:column  colspan="2" styleClass="avance">
+
+                                                <b>Criterios:</b><br></br> 
+                                                <br></br>
+                                              
+                                                
+                                                
+                                                <p:dataTable id="tablaCriterios" value="#{aceptarPoliticaBeanUI.politicaSeleccionada.politicaTieneCriterioList}" var="politicaCriterio" emptyMessage="Seleccione la unidad para mostrar criterios" >
+                                                    
+                                                    <p:column headerText="Criterios" >  
+                                                        <h:outputText value="#{politicaCriterio.CEVId.CEVNombre} #{politicaCriterio.NExamen >0 ?  '(' : '' } #{politicaCriterio.NExamen >0 ?  politicaCriterio.NExamen : '' } #{politicaCriterio.NExamen >0 ?  ')' : '' }" />  
+                                                    </p:column>
+                                                    <p:column id="porcentajes"   headerText="Porcentajes"  >
+                                                        <h:outputText value="#{politicaCriterio.porcentaje}" />  
+                                                    </p:column> 
+                                                    
+                                                    
+                                                </p:dataTable>
+                                                 <p:column colspan="1" styleClass="avance">
+                                                      <br></br>
+                                                <b>Criterios para exentar:</b><br></br>
+                                                <p:inputTextarea readonly="true" id="criterioExentarPO"  style="height:150px;width: 600px" value="#{aceptarPoliticaBeanUI.politicaSeleccionada.POECriterioExentar}"  >
+                                                   
+                                                </p:inputTextarea> 
+                                                <br></br>
+                                               <b>Comentario:</b><br></br>
+                                               <p:inputTextarea readonly="true" id="textCom" style="height:150px;width: 600px" value="#{aceptarPoliticaBeanUI.politicaSeleccionada.POEComentario}" > 
+                                                    
+                                                </p:inputTextarea>  
+                                                <br/>
+                                                <span ><b>Representante de grupo: </b> <br></br> </span>    
+                                                <p:outputLabel  id="representante" value="#{aceptarPoliticaBeanUI.politicaSeleccionada.alumnoALId.ALNombre} #{aceptarPoliticaBeanUI.politicaSeleccionada.alumnoALId.ALApellidoPater} #{aceptarPoliticaBeanUI.politicaSeleccionada.alumnoALId.ALApellidoMaterno} "> </p:outputLabel>
+                                                
+                                                
+                                             </p:column>
+                                               
+                                               
+                                                 
+                                            </p:column>
+<!--
+                                   
+                                           -->    
+                                        </p:row>
+                                    </p:panelGrid>
+                                </div>
+                                </p:outputPanel>
+                            <p:commandButton value="Aceptar" disabled="#{aceptarPoliticaBeanUI.disableBotones}" style="padding:0px 10px; margin-right: 30px; margin-top: 20px" onclick="PF('confirmation').show()" type="button" id="gs" icon="pi pi-thumbs-up" styleClass="boton" />
+
+                            <p:confirmDialog message="Estas aceptando la política de evaluación, ¿Desea continuar?" header="Confirmación" severity="alert" widgetVar="confirmation">
+                                <center>
+                                    <p:commandButton value="Aceptar"  onclick="PF('confirmation').hide()" 
+                                                     actionListener="#{aceptarPoliticaBeanUI.Aceptacion()}" onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()" styleClass="ui-confirmdialog-yes" icon="fa fa-fw fa-check"   />
+                                    <!--
+                                    <p:commandButton ajax="true" process="@this" value="Aceptar y generar PDF"  onclick="PF('confirmation').hide()" oncomplete="PF('status').hide()" onstart="PF('status').show()"
+                                                     styleClass="ui-confirmdialog-yes"  icon="fa fa-fw fa-check"   >
+                                    </p:commandButton >
+                                    -->
+                                    <p:commandButton  value="Cancelar" onclick="PF('confirmation').hide()" type="button"  styleClass="ui-confirmdialog-no" icon="fa fa-fw fa-times" />
+                                </center>
+                            </p:confirmDialog>
+                            <p:commandButton ajax="true" process="@this" disabled="#{aceptarPoliticaBeanUI.disableBotones}"  value="Rechazar" onclick="PF('confirmacionrechazo').show()" style="padding:0px 10px;"  id="ge" icon="pi pi-thumbs-down" styleClass="boton"   /> 
+                          
+                      
+                          
+                            <p:confirmDialog  widgetVar="confirmacionrechazo"
+                                message="Ingrese el motivo de rechazo de la política de evaluación"  header="Confirmación" severity="alert" style="color: #ccc" styleClass="ventana" >
+                               
+                                <center>
+                                    
+                                    <p:inputTextarea  id="ComentarioRechazo" style="height:50px;width: 350px" value="#{aceptarPoliticaBeanUI.comentarioPolitica.PECComentario}"  > 
+                                        <p:ajax          event="keyup"
+                                                        update=":formId:aceptarp   "
+                                                       />
+                                    </p:inputTextarea>  
+                                    
+                                    <br/>
+                                    <p:commandButton value="Aceptar" disabled="#{aceptarPoliticaBeanUI.comentarioPolitica.PECComentario.length() >=3 ? false : true}" id="aceptarp" onclick="PF('confirmacionrechazo').hide()" 
+                                                             actionListener="#{aceptarPoliticaBeanUI.rechazar()}" onstart="PF('cargando').show()" oncomplete="PF('cargando').hide()" styleClass="ui-confirmdialog-yes" icon="fa fa-fw fa-check"   />
+                                                                           
+                                        <p:commandButton value="Cancelar " type="button" onclick="PF('confirmacionrechazo').hide()" styleClass="ui-confirmdialog-no"  />                   
+                                                              
+
+                                </center>
+                                
+                            </p:confirmDialog>
+                            
+                             
+                             </p:fieldset>
+                        
+                  
+
+                     </h:form>
+                          <h:form rendered="#{loginBean.formano}">
+                        <center><h1>Su tipo de cuenta no permite el acceso a este sitio. Presione el botón de inicio para volver a Siract.</h1></center>
+                 </h:form>
+                    <p:dialog widgetVar="cargando" modal="true" draggable="false" closable="false" resizable="false" showHeader="false"
+                          style="width: 50px;height: 50px;background: none;border: none; box-shadow: none">
+                    <p:graphicImage name="imagenes/gif-load.gif"/>
+                </p:dialog>
+             </center>
+          </h:body>
+        </f:view>
+    </ui:define>   
+</ui:composition>

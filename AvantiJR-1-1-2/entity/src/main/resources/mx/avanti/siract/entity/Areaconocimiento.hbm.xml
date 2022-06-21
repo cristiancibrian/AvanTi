@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 17/03/2016 10:10:18 PM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="mx.avanti.siract.entity.Areaconocimiento" table="areaconocimiento" catalog="siract" optimistic-lock="version">
+        <id name="acoid" type="java.lang.Integer">
+            <column name="ACOid" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="planestudio" class="mx.avanti.siract.entity.Planestudio" fetch="select">
+            <column name="PlanEstudio_PESid" />
+        </many-to-one>
+        <property name="acoclave" type="int">
+            <column name="ACOclave" not-null="true" />
+        </property>
+        <property name="aconombre" type="string">
+            <column name="ACOnombre" length="120" />
+        </property>
+        <set name="profesors" table="coordinadorarea" inverse="false" lazy="true" fetch="select">
+            <key>
+                <column name="AreaConocimiento_ACOid" not-null="true" />
+            </key>
+            <many-to-many entity-name="mx.avanti.siract.entity.Profesor">
+                <column name="Profesor_PROid" not-null="true" />
+            </many-to-many>
+        </set>
+        <set name="unidadaprendizajes" table="areaconocimiento_has_unidadaprendizaje" inverse="false" lazy="true" fetch="select">
+            <key>
+                <column name="AreaConocimiento_ACOid" not-null="true" />
+            </key>
+            <many-to-many entity-name="mx.avanti.siract.entity.Unidadaprendizaje">
+                <column name="UnidadAprendizaje_UAPid" not-null="true" />
+            </many-to-many>
+        </set>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/Template/MasterTemplate.xhtml">
+    <ui:define name="contenido">
+        <f:view contentType="text/html">
+
+
+            <h:head>
+                <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces"/>
+                <f:facet name="first">
+
+                    <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                    <title>Asignar Responsable de Programa Educativo</title>
+                </f:facet>
+            </h:head>
+            <h:body onload="#{asignarRPEBeanUI.filtro()}" onkeydown="if (event.keyCode == 13) {
+                        event.preventDefault();
+                        return false;
+                    }">
+
+                <!-- <h:form id="formrpe" rendered="#{loginBean.tienePermiso}"> -->
+                <h:form id="formrpe" rendered="#{loginBean.permisoGeneral(asignarRPEBeanUI.IDCATALOGOADMIASIGNARRP)}">
+                    <p:fieldset legend="Histórico: Responsable de Programa Educativo">
+                        <p:growl id="growl" showDetail="true" life="10000"/>
+                        <p:commandButton id="showAltaButton"
+                                         icon="fa fa-plus"
+                                         oncomplete="PF('dlg').show();"
+                                         title="Agregar"
+                                         iconPos="center"
+                                         actionListener="#{asignarRPEBeanUI.nuevo}"
+                                         update="capdlg :formrpe:rpe"/>
+
+                        <p:commandButton id="showEliminarButton"
+                                         icon="fa fa-minus-circle"
+                                         title="#{asignarRPEBeanUI.tooltip(2)}"
+                                         disabled="#{asignarRPEBeanUI.deshabilitarMenu()}"
+                                         oncomplete="PF('dlg').show();"
+                                         iconPos="center"
+                                         actionListener="#{asignarRPEBeanUI.eliminar}"
+                                         update="capdlg"/>
+
+                        <p:commandButton id="showModificarButton"
+                                         icon="fa fa-edit"
+                                         oncomplete="PF('dlg').show();"
+                                         title="#{asignarRPEBeanUI.tooltip(3)}"
+                                         disabled="#{asignarRPEBeanUI.deshabilitarMenu()}"
+                                         actionListener="#{asignarRPEBeanUI.modificar}"
+                                         iconPos="center"
+                                         update="capdlg">
+                            <p:ajax event="click" update="capdlg, cap"/>
+                        </p:commandButton>
+                        <p:commandButton id="showVersionarButton"
+                                         icon="fa fa-fw fa-clone"
+                                         oncomplete="PF('dlg').show();"
+                                         title="#{asignarRPEBeanUI.tooltip(4)}"
+                                         disabled="#{asignarRPEBeanUI.deshabilitarMenu()}"
+                                         actionListener="#{asignarRPEBeanUI.versionar}"
+                                         iconPos="center"
+                                         update="capdlg">
+                            <p:ajax event="click" update="capdlg, cap"/>
+                        </p:commandButton>
+                        <p:commandLink disabled="false"
+                                       id="exportPDF"
+                                       actionListener="#{asignarRPEBeanUI.asignarDatosPDF}"
+                                       ajax="false"
+                                       update="formrpe:ces"
+                                       onclick="PrimeFaces.monitorDownload(null, stop)">
+                            <p:graphicImage title="Descargar pdf" name="imagenes/pdf.png" height="42" width="42"
+                                            style="vertical-align: middle; margin-bottom: 10px;"/>
+                            <p:fileDownload value="#{asignarRPEBeanUI.file}"></p:fileDownload>
+                            <p:remoteCommand name="stop" update="formrpe,formrpe:ces,formrpe:selectPE,formrpe:filtro"/>
+                        </p:commandLink>
+
+                        <br/><br/>
+                        <div id="selectCiclo" style="display: inline-block">
+                            <p:outputLabel value="Seleccione un ciclo escolar "
+                                           style="margin-top: 40%;"/><br/>
+                            <p:selectOneMenu id="ces"
+                                             value="#{asignarRPEBeanUI.asignarRPEHelper.filtroCicloescolar.CESid}"
+                                             style="width: 70%">
+                                <p:ajax event="valueChange"
+                                        update="rpe,:formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:selectPE,:formrpe:filtro"
+                                        listener="#{asignarRPEBeanUI.filtrarRpePorCiclo()}"/>
+                                <f:selectItem itemLabel="--Seleccionar todos--" itemValue="#{0}"/>
+                                <f:selectItems value="#{asignarRPEBeanUI.listaOrdenadaCiclos}"
+                                               var="cesid"
+                                               itemLabel="#{cesid.CEScicloEscolar}"
+                                               itemValue="#{cesid.CESid}"/>
+                            </p:selectOneMenu>
+                        </div>
+
+                        <div id="selecPE" style="display: inline-block; margin-left: 2%;">
+                            <p:outputLabel value="Seleccione un programa educativo "
+                                           style="margin-top: 40%;"/><br/>
+                            <p:selectOneMenu value="#{asignarRPEBeanUI.asignarRPEHelper.filtroProgramaeducativo.PEDid}"
+                                             style="width: 100%" id="selectPE">
+                                <p:ajax event="valueChange"
+                                        update="rpe,:formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:filtro,:formrpe:ces"
+                                        listener="#{asignarRPEBeanUI.filtrarRpeProgramaEducativo()}"/>
+                                <f:selectItem itemLabel="--Seleccionar todos--" itemValue="#{0}"/>
+                                <f:selectItems value="#{asignarRPEBeanUI.programaeducativoList}"
+                                               var="pe"
+                                               itemLabel="#{pe.PEDnombre}"
+                                               itemValue="#{pe.PEDid}"/>
+
+                            </p:selectOneMenu>
+                        </div>
+
+                        <div id="divFiltro" style="text-align: right;">
+                            <p:outputLabel style="font-size: 19px" value="B&#250;squeda específica de RPE: "/>
+                            <p:inputText id="filtro"
+                                         autocomplete="off"
+                                         label="filtrado"
+                                         value="#{asignarRPEBeanUI.busqueda}">
+                                <p:ajax event="keyup"
+                                        update="rpe,:formrpe:showEliminarButton,:formrpe:showModificarButton"
+                                        listener="#{asignarRPEBeanUI.filtrarRpeBusquedaEspecifica()}"/>
+                            </p:inputText>
+                        </div>
+
+                        <br/>
+                        <p:dataTable id="rpe" var="rpe"
+                                     value="#{asignarRPEBeanUI.RPEFiltrado}"
+                                     rowKey="#{rpe.RPEid}"
+                                     selection="#{asignarRPEBeanUI.asignarRPEHelper.rpeSeleccionado}"
+                                     rows="10"
+                                     rowsPerPageTemplate="5,10,15,20"
+                                     paginator="true"
+                                     selectionMode="single"
+                                     widgetVar="stest"
+                                     paginatorTemplate="{CurrentPageReport}
+                                     {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                     {NextPageLink} {LastPageLink} 
+                                     {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="({currentPage} de {totalPages})"
+                                     emptyMessage="No se han encontrado registros">
+
+                            <p:ajax event="rowSelect"
+                                    update="rpe,:formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton"></p:ajax>
+                            <p:ajax event="rowUnselect"
+                                    update=":formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton"></p:ajax>
+                            <p:ajax event="rowUnselectCheckbox"
+                                    update=":formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton"></p:ajax>
+                            <p:ajax event="rowSelectCheckbox"
+                                    update=":formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton"></p:ajax>
+                            <p:ajax event="toggleSelect"
+                                    update=":formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton"></p:ajax>
+
+                            <p:column headerText="Programa educativo">
+                                <h:outputText value="#{rpe.programaeducativo.PEDnombre}"/>
+                            </p:column>
+                            <p:column headerText="No. empleado">
+                                <h:outputText value="#{rpe.profesor.PROnumeroEmpleado}"/>
+                            </p:column>
+                            <p:column headerText="Responsable de Programa educativo">
+                                <h:outputText
+                                        value="#{rpe.profesor.PROnombre} #{rpe.profesor.PROapellidoPaterno} #{rpe.profesor.PROapellidoMaterno}"/>
+                            </p:column>
+                            <p:column headerText="Ciclo Escolar">
+                                <h:outputText value="#{rpe.cicloEscolar.CEScicloEscolar}"/>
+                            </p:column>
+
+                        </p:dataTable>
+
+                        <p:dialog id="capdlg"
+                                  header="#{asignarRPEBeanUI.cabecera}"
+                                  widgetVar="dlg"
+                                  draggable="false"
+                                  resizable="false"
+                                  showEffect="fade"
+                                  hideEffect="explode"
+                                  modal="true"
+                                  closable="true">
+                            <p:ajax event="open" update="cap"
+                                    listener="#{asignarRPEBeanUI.asignarRPEHelper.seleccionarVersionModificar()}"/>
+                            <p:panelGrid id="cap"
+                                         style="margin-top: 20px; position: relative">
+                                <p:row rendered="#{asignarRPEBeanUI.asignarRPEHelper.mostrarVersiones()}">
+                                    <p:column style="font-weight: bold;"><h:outputText
+                                            value="#{asignarRPEBeanUI.textoVersion}"/></p:column>
+                                    <p:column colspan="2" style="font-weight: bold;">
+                                        <p:selectOneMenu id="somVersion"
+                                                         filter="true"
+                                                         autoWidth="false"
+                                                         style="width: 450px"
+                                                         value="#{asignarRPEBeanUI.asignarRPEHelper.version}"
+                                                         rendered="#{asignarRPEBeanUI.asignarRPEHelper.mostrarVersiones()}">
+                                            <f:selectItems
+                                                    value="#{asignarRPEBeanUI.asignarRPEHelper.listaVersionesRpeSeleccionado}"
+                                                    var="rpeVersion"
+                                                    itemLabel="#{rpeVersion}"
+                                                    itemValue="#{rpeVersion}"/>
+                                            <p:ajax event="valueChange"
+                                                    update="cap"
+                                                    listener="#{asignarRPEBeanUI.asignarRPEHelper.seleccionarRegistroVersion()}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column style="font-weight: bold;">Programa Educativo:</p:column>
+                                    <p:column colspan="2" style="font-weight: bold;">
+                                        <p:selectOneMenu id="areape" filter="true"
+                                                         autoWidth="false" style=" width: 450px"
+                                                         value="#{asignarRPEBeanUI.asignarRPEHelper.programaEducativo.PEDid}"
+                                                         disabled="#{asignarRPEBeanUI.deshabilitar}">
+                                            <f:selectItem
+                                                    itemLabel="Seleccione un programa educativo"
+                                                    itemValue="#{0}"/>
+                                            <f:selectItems value="#{asignarRPEBeanUI.programaeducativoList}"
+                                                           var="pe"
+                                                           itemLabel="#{pe.PEDnombre}"
+                                                           itemValue="#{pe.PEDid}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+
+                                <p:row>
+                                    <p:column style="font-weight: bold;">Responsable de programa educativo:</p:column>
+                                    <p:column colspan="2" style="font-weight: bold;">
+                                        <p:selectOneMenu id="caprpe" filter="true"
+                                                         autoWidth="false" style=" width: 450px"
+                                                         value="#{asignarRPEBeanUI.asignarRPEHelper.profesor.PROid}"
+                                                         disabled="#{asignarRPEBeanUI.deshabilitar}">
+                                            <f:selectItem
+                                                    itemLabel="Seleccione Responsable de Programa Educativo"
+                                                    itemValue="#{0}"/>
+                                            <f:selectItems value="#{asignarRPEBeanUI.profesorList}"
+                                                           var="prof"
+                                                           itemLabel="#{prof.PROnombre}
+                                                           #{prof.PROapellidoPaterno}
+                                                           #{prof.PROapellidoMaterno}"
+                                                           itemValue="#{prof.PROid}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row>
+                                    <p:column style="font-weight: bold;">Ciclo Escolar: </p:column>
+                                    <p:column colspan="2" style="font-weight: bold;">
+                                        <p:selectOneMenu id="capCE" filter="true"
+                                                         autoWidth="false" style=" width: 450px"
+                                                         value="#{asignarRPEBeanUI.asignarRPEHelper.cicloescolar.CESid}"
+                                                         disabled="#{asignarRPEBeanUI.deshabilitar}">
+                                            <f:selectItem
+                                                    itemLabel="Seleccione Ciclo escolar"
+                                                    itemValue="#{0}"/>
+                                            <f:selectItems value="#{asignarRPEBeanUI.listaOrdenadaCiclos}" var="CESid"
+                                                           itemLabel="#{CESid.CEScicloEscolar}"
+                                                           itemValue="#{CESid.CESid}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                                <p:row rendered="#{asignarRPEBeanUI.mostrarNuevoCicloVersion()}">
+                                    <p:column style="font-weight: bold;">Nuevo Ciclo Escolar: </p:column>
+                                    <p:column colspan="2" style="font-weight: bold;">
+                                        <p:selectOneMenu id="capNuevoCE" filter="true"
+                                                         autoWidth="false" style=" width: 450px"
+                                                         value="#{asignarRPEBeanUI.asignarRPEHelper.nuevoCicloEscolar.CESid}"
+                                                         disabled="#{asignarRPEBeanUI.deshabilitarNuevaVersion}">
+                                            <f:selectItem
+                                                    itemLabel="Seleccione Ciclo escolar"
+                                                    itemValue="#{0}"/>
+                                            <f:selectItems value="#{asignarRPEBeanUI.listaOrdenadaCiclos}" var="CESid"
+                                                           itemLabel="#{CESid.CEScicloEscolar}"
+                                                           itemValue="#{CESid.CESid}"/>
+                                        </p:selectOneMenu>
+                                    </p:column>
+                                </p:row>
+                            </p:panelGrid>
+                            <br/>
+                            <div align="center">
+                                <p:commandButton value="Aceptar" icon="ui-icon-check"
+                                                 action="#{asignarRPEBeanUI.onClickSubmit()}"
+                                                 update=":formrpe:ces,:formrpe:growl,:formrpe:rpe,:formrpe:cap, :formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton,:formrpe:selectPE,:formrpe:filtro">
+                                </p:commandButton>
+
+                                <p:commandButton value="Cancelar" icon="ui-icon-close"
+                                                 oncomplete="PF('dlg').hide()"
+                                                 update=":formrpe:ces,:formrpe:growl,:formrpe:rpe,:formrpe:cap, :formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton,:formrpe:selectPE,:formrpe:filtro"
+                                                 action="#{asignarRPEBeanUI.restablecerValores()}">
+                                </p:commandButton>
+                            </div>
+                            <p:ajax event="close" listener="#{asignarRPEBeanUI.restablecerValores()}"
+                                    update=":formrpe:ces,:formrpe:growl,:formrpe:rpe,:formrpe:cap, :formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton,:formrpe:selectPE,:formrpe:filtro"/>
+                        </p:dialog>
+                    </p:fieldset>
+                </h:form>
+                <p:confirmDialog id="confirmacionId" showEffect="fade" hideEffect="explode"
+                                 widgetVar="confirmacion" header="Confirmación"
+                                 message="#{asignarRPEBeanUI.mensajeConfirmacion}"
+                                 severity="alert" appendTo="@(body)"
+                                 global="true">
+                    <h:form>
+                        <div align="center">
+                            <p:commandButton value="Aceptar" action="#{asignarRPEBeanUI.Confirmacion}"
+                                             icon="ui-icon-check"
+                                             update=":formrpe:ces,:formrpe:growl,:formrpe:rpe,:formrpe:cap, :formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton,:formrpe:selectPE,:formrpe:filtro"
+                                             oncomplete="oncomplete=PF('confirmacion').hide();">
+                            </p:commandButton>
+                            <p:commandButton value="Cancelar" oncomplete="PF('confirmacion').hide();"
+                                             icon="ui-icon-close"
+                                             update=":formrpe:ces,:formrpe:growl,:formrpe:rpe,:formrpe:cap, :formrpe:showEliminarButton,:formrpe:showModificarButton,:formrpe:showVersionarButton,:formrpe:selectPE,:formrpe:filtro">
+                            </p:commandButton>
+                        </div>
+                    </h:form>
+                </p:confirmDialog>
+
+                <h:form rendered="#{loginBean.formano}">
+                    <center><h2>Su tipo de cuenta no permite el acceso a este sitio. Presione el botón de inicio
+                        para volver a SIRACT.</h2></center>
+                </h:form>
+
+            </h:body>
+        </f:view>
+    </ui:define>
+</ui:composition>

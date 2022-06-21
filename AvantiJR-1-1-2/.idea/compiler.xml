@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="persistence" />
+        <module name="Siract" />
+        <module name="business" />
+        <module name="entity" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="business" target="1.8" />
+      <module name="entity" target="1.8" />
+      <module name="persistence" target="1.8" />
+      <module name="Siract" target="8" />
+      <module name="SIRACT" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Siract" options="-endorseddirs &quot;D:\1. Kevin Arizaga Rivera\6. Mis Carpetas\AVANTI\Siract - Mensajes corregidos (PrimeFaces 8.0)\Siract\Siract\target/endorsed&quot;" />
+    </option>
+  </component>
+</project>

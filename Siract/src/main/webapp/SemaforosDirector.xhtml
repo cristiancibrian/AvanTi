@@ -1,0 +1,361 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"                    
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:head>
+        <title>SIRACT - Semáforos</title>
+        <h:outputStylesheet name="Style.css" library="css"/>
+        <h:outputStylesheet name="Style_botones.css" library="css"/>
+        <script language="JavaScript" type="text/javascript">
+            function redireccionar()
+            {
+                location.href = "http://localhost:" + location.port + "/Siract/GeneradorReportes.xhtml";
+            }
+        </script>
+        <style>
+            .grid-container {
+                display: grid;
+                grid-template-columns: 50% 50%;
+                grid-gap: 10px;
+                padding: 10px;
+                margin-bottom: 3%;
+            }
+
+            .grid-container > div {
+                text-align: center;
+                padding: 20px 0;
+            }
+
+            .myChartSelector .jqplot-series-canvas{
+                background : #f5f3e5 ;
+            }
+
+            .ui-datascroller .ui-datascroller-item {
+                width: 33%;
+                display: inline-block;
+            }
+        </style>
+    </h:head>
+
+    <ui:decorate template="/Template/MasterTemplate.xhtml">
+        <ui:define name="contenido">
+            <h:body style="overflow: hidden;">
+
+                <f:metadata>
+                    <f:viewAction action="#{semaforosDirectorBeanUI.init()}" />
+                </f:metadata>
+
+                <p:idleMonitor onactive="sessionTimeOutDialog.show();" timeout="#{session.maxInactiveInterval * 1000}" />
+
+                <p:dialog header="#{msg['error.sessionTimeOut.header']}" widgetVar="sessionTimeOutDialog" modal="true" closable="false" width="400" visible="false">
+                    <h:outputText value="Sesión expirada"/>
+                    <input id="confirmBackToLogin" type="button" value="recargar"
+                           onclick="window.location = '#{facesContext.externalContext.requestContextPath}/public.jsp';" />
+                </p:dialog>
+
+
+                <h:form id="forma">
+                    <p:growl showDetail="true" sticky="false" life="7000"/>
+                    <p:fieldset widgetVar="panelGauge" id="panel_semaforo" legend="Semáforos de Reportes de Avance Contenido Temático" style="text-align: center; position:relative; margin-bottom: 1%;">
+
+
+                        <div class="grid-container">
+                            <div style="margin-left: -1%;">
+                                <a href="#semaforosPED">
+                                    <p:chart type="metergauge" id="general" styleClass="myChartSelector" rendererType="model" model="#{semaforosDirectorBeanUI.entidadSemPrincipal.semaforo}" 
+                                             style="font-weight:bold"/>
+                                </a>
+
+
+                                <p:commandButton onstart="PF('status').show()" oncomplete="PF('status').hide(),document.getElementById('forma:general').click();"
+                                                 value="Ver por Programa Educativo" actionListener="#{semaforosDirectorBeanUI.cambioParametroRACT('4')}"
+                                                 update="semaforosPED subTitulo" icon="fa fa-fw fa-expand" style="margin-bottom: 20px; padding: 0.5%;">
+                                </p:commandButton>
+
+                                <p:panelGrid id="gridGeneral" style="margin: auto" >
+                                    <p:row>
+                                        <p:column styleClass="cabeza">
+                                            <h:outputText value="#{semaforosDirectorBeanUI.headerEnviadosGeneral}" />
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.headerEsperadosGeneral}"/>
+                                        </p:column>
+                                    </p:row>
+
+                                    <p:row>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.entidadSemPrincipal.numEnviados}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.entidadSemPrincipal.numEsperados}" ></p:outputLabel>
+                                        </p:column>
+                                    </p:row>
+                                </p:panelGrid>
+                            </div>
+
+
+                            <div style="margin-left: 1%; margin-right: 5%;">
+                                <div style="margin-top: 10%;">
+                                    <h3 style="margin-top:5%; margin-bottom: 5%; margin-right: 2%; display: inline;">
+                                        <h:outputLabel for="selTipoReporte" value="Tipo de reporte: "/>
+                                    </h3>
+
+                                    <p:selectOneMenu id="selTipoReporte" style="width: 320px;" value="#{semaforosDirectorBeanUI.seleccionTipoReporte}" effect="fold" >
+                                        <f:selectItem itemLabel="Enviados" itemValue="enviados"/>
+                                        <f:selectItem itemLabel="No enviados" itemValue="noEnviados"/>
+                                        <f:selectItem itemLabel="Porcentaje de avance global completo" itemValue="enviadosCompletos" />
+                                        <f:selectItem itemLabel="Porcentaje de avance global incompleto" itemValue="enviadosIncompletos"/>
+
+                                        <p:ajax event="valueChange" listener="#{semaforosDirectorBeanUI.cambioParametroTipoReporte()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                                update="forma:general forma:gridGeneral forma:grid forma:semaforosRACT forma:subTitulo forma:semaforosPED"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+
+                                <div style="margin-top: 4%; margin-bottom: 3%;">
+                                    <h3 style="margin-top:5%; margin-bottom: 5%; margin-right: 5%; display: inline;">
+                                        <h:outputLabel for="selCicloEscolar" value="Ciclo escolar: "/>
+                                    </h3>
+
+                                    <p:selectOneMenu id="selCicloEscolar" style="width: 130px ;" value="#{semaforosDirectorBeanUI.cicloSeleccionado.CESid}" effect="fold">
+                                        <f:selectItems value="#{semaforosDirectorBeanUI.semaforosHelper.obtenerListaCiclosEscolares()}"
+                                                       var="ciclo" itemLabel="#{ciclo.CEScicloEscolar}" itemValue="#{ciclo.CESid}"/>
+
+                                        <p:ajax event="valueChange" listener="#{semaforosDirectorBeanUI.cambioParametroCiclo()}" onstart="PF('status').show()" oncomplete="PF('status').hide()"
+                                                update="forma:general forma:gridGeneral forma:grid forma:semaforosRACT forma:subTitulo forma:semaforosPED"/>
+                                    </p:selectOneMenu>
+                                </div>
+
+
+                                <p:panelGrid id="grid" style="margin-top: 2%" >
+                                    <p:row>
+                                        <p:column styleClass="cabeza" >
+                                            <b># RACT</b>
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <b>Fecha Corte</b>
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <b>Fecha Límite</b>
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <b>Estado</b>
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.headerEnviadosRACT}"/>
+                                        </p:column>
+                                        <p:column styleClass="cabeza">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.headerEsperadosTablaPrincipal}"/>
+                                        </p:column>
+                                    </p:row>
+
+                                    <p:row>
+                                        <p:column style="text-align: center">
+                                            <b>1</b>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(0)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(1)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.fecha1}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.listaEntidadesSemRACTs[0].numEnviados}"/>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.esperadosTabla1}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:row>
+
+                                    <p:row>
+                                        <p:column style="text-align: center">
+                                            <b>2</b>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(2)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(3)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.fecha2}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.listaEntidadesSemRACTs[1].numEnviados}"/>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.esperadosTabla2}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:row>
+
+                                    <p:row>
+                                        <p:column style="text-align: center">
+                                            <b>3</b>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(4)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{rACTBeanUI.ractBeanHelper.fechas.get(5)}" >
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.fecha3}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.listaEntidadesSemRACTs[2].numEnviados}"/>
+                                        </p:column>
+                                        <p:column style="text-align: center">
+                                            <p:outputLabel value="#{semaforosDirectorBeanUI.esperadosTabla3}" >
+                                            </p:outputLabel>
+                                        </p:column>
+                                    </p:row>
+
+                                </p:panelGrid>
+                            </div>
+                        </div>
+
+
+
+                        <h:panelGrid id="semaforosRACT" columns="3" style="width:100%; margin-top: 3%; margin-bottom: 3%" cellpadding="25">
+                            <c:forEach items="#{semaforosDirectorBeanUI.listaEntidadesSemRACTs}" var="semaforoRACT">
+
+                                <p:column style="width: 33%;">
+                                    <p:chart type="metergauge" styleClass="myChartSelector" rendererType="model" model="#{semaforoRACT.semaforo}" style="height:250px; font-weight:bold"/>                                    
+                                    <p:commandButton onstart="PF('status').show()" oncomplete="PF('status').hide(),document.getElementById('forma:general').click();" 
+                                                     value="Ver por Programa Educativo" actionListener="#{semaforosDirectorBeanUI.cambioParametroRACT(semaforoRACT.nombrePrograma)}"
+                                                     update="semaforosPED subTitulo" icon="fa fa-fw fa-expand" style="margin-bottom: 20px; padding: 0.5%;"/>
+
+                                    <p:panelGrid style="margin: auto">
+                                        <p:row>
+                                            <p:column styleClass="cabeza">
+                                                <h:outputText value="#{semaforosDirectorBeanUI.headerEnviadosRACT}"/>
+                                            </p:column>
+                                            <p:column styleClass="cabeza">
+                                                <h:outputText value="#{semaforosDirectorBeanUI.headerEsperadosRACT}"/>
+                                            </p:column>
+                                        </p:row>
+
+                                        <p:row>
+                                            <p:column style="text-align: center">
+                                                <p:outputLabel value="#{semaforoRACT.numEnviados}" >
+                                                </p:outputLabel>
+                                            </p:column>
+                                            <p:column style="text-align: center">
+                                                <p:outputLabel value="#{semaforoRACT.numEsperados}" ></p:outputLabel>
+                                            </p:column>
+                                        </p:row>
+                                    </p:panelGrid>
+                                </p:column>
+
+                            </c:forEach>
+                        </h:panelGrid>
+
+
+
+                        <a name="semaforosPED"/>
+
+                        <h:panelGroup id="semaforosPED">
+                            <h:panelGroup rendered="#{semaforosDirectorBeanUI.mostrarSemaforosPEDs}">
+
+                                <div style="margin-bottom: 30px; text-align: center">
+                                    <h2 style="margin-top:5%; margin-bottom: 5% ;display: inline">
+                                        <p:outputLabel  id="subTitulo" value="#{semaforosDirectorBeanUI.subTitutlo}">
+                                        </p:outputLabel>
+                                    </h2>
+
+                                    <p:selectOneMenu style="width: 130px ;"  id="r" value="#{semaforosDirectorBeanUI.numRact}" effect="fold">
+                                        <f:selectItem itemLabel="GENERAL" itemValue="4"/>
+                                        <f:selectItem itemLabel="RACT #1" itemValue="1"/>
+                                        <f:selectItem itemLabel="RACT #2" itemValue="2"/>
+                                        <f:selectItem itemLabel="RACT #3" itemValue="3"/>
+                                        <p:ajax event="valueChange"  listener="#{semaforosDirectorBeanUI.cambioParametroRACT(semaforosDirectorBeanUI.numRact)}" 
+                                                onstart="PF('status').show()" oncomplete="PF('status').hide()" update="semaforosPED subTitulo"/>
+                                    </p:selectOneMenu>
+
+                                </div>
+                                <span></span>
+
+                                <p:dataScroller value="#{semaforosDirectorBeanUI.listaEntidadesSemPEDs}" var="semaforoPED" chunkSize="6" >
+                                    <f:facet name="header">                                        
+                                    </f:facet>
+
+                                    <f:facet name="loader">
+                                        <p:commandButton type="button" value="Cargar Mas" icon="fa fa-fw fa-circle-o-notch"/>
+                                    </f:facet>
+
+                                    <h:panelGrid columns="3" style="width:100%; margin-top: 3%;" cellpadding="25">
+                                        <p:column style="width: 33%;">
+                                            <p:chart type="metergauge" styleClass="myChartSelector" rendererType="model" model="#{semaforoPED.semaforo}" style="height:250px; font-weight:bold"/>
+
+                                            <p:panelGrid style="margin: auto">
+                                                <p:row>
+                                                    <p:column styleClass="cabeza">
+                                                        <h:outputText value="#{semaforosDirectorBeanUI.headerEnviadosPE}"/>
+                                                    </p:column>
+                                                    <p:column styleClass="cabeza">
+                                                        <h:outputText value="#{semaforosDirectorBeanUI.headerEsperadosPE}"/>
+                                                    </p:column>
+                                                </p:row>
+
+                                                <p:row>
+                                                    <p:column style="text-align: center">
+                                                        <p:outputLabel value="#{semaforoPED.numEnviados}" >
+                                                        </p:outputLabel>
+                                                    </p:column>
+                                                    <p:column style="text-align: center">
+                                                        <p:outputLabel value="#{semaforoPED.numEsperados}" ></p:outputLabel>
+                                                    </p:column>
+                                                </p:row>
+                                            </p:panelGrid>
+                                        </p:column>
+
+                                    </h:panelGrid>
+                                </p:dataScroller>
+
+
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </p:fieldset>
+
+
+                    <p:dialog widgetVar="status" modal="true" draggable="false"
+                              closable="false" resizable="false" showHeader="false"
+                              style="width: 50px;height: 50px;background: none;border: none; box-shadow: none">
+                        <p:graphicImage name="imagenes/gif-load.gif" />
+                    </p:dialog>
+
+
+                </h:form>
+
+            </h:body>
+        </ui:define>
+    </ui:decorate>
+
+</ui:composition>
